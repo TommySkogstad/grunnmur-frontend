@@ -39,6 +39,20 @@ describe('createQueryClient', () => {
     expect(defaults.queries?.retry).toBe(3)
   })
 
+  it('overrides kan sette mutations-config', () => {
+    const client = createQueryClient({ mutations: { retry: 2 } })
+    const defaults = client.getDefaultOptions()
+    expect(defaults.mutations?.retry).toBe(2)
+  })
+
+  it('tomt overrides-objekt gir defaults', () => {
+    const client = createQueryClient({})
+    const defaults = client.getDefaultOptions()
+    expect(defaults.queries?.staleTime).toBe(300_000)
+    expect(defaults.queries?.retry).toBe(1)
+    expect(defaults.queries?.gcTime).toBe(300_000)
+  })
+
   it('returnerer en ny instans ved hvert kall', () => {
     const client1 = createQueryClient()
     const client2 = createQueryClient()
