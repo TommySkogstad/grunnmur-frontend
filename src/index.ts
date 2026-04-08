@@ -9,3 +9,7 @@
 // #6 — Dokumentasjon og v1.0.0 release
 
 export const VERSION = '0.0.1'
+
+// API-klient
+export { createApiClient, ApiError } from './api/apiClient'
+export type { ApiClientConfig, RequestOptions, ApiClient } from './api/apiClient'
