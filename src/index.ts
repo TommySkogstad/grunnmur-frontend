@@ -19,3 +19,9 @@ export { createAuthProvider } from './auth/AuthContext'
 export type { AuthContextValue, AuthProviderConfig } from './auth/AuthContext'
 export { createAuthApi } from './auth/authApi'
 export type { AuthApi, AuthApiConfig, LoginResponse } from './auth/authApi'
+
+// Komponenter
+export { ErrorBoundary } from './components/ErrorBoundary'
+export type { ErrorBoundaryProps } from './components/ErrorBoundary'
+export { createProtectedRoute } from './components/ProtectedRoute'
+export type { ProtectedRouteProps } from './components/ProtectedRoute'
