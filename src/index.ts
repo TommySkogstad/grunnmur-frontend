@@ -26,6 +26,9 @@ export type { ErrorBoundaryProps } from './components/ErrorBoundary'
 export { createProtectedRoute } from './components/ProtectedRoute'
 export type { ProtectedRouteProps } from './components/ProtectedRoute'
 
+// Query
+export { createQueryClient } from './query/queryClient'
+
 // Formatters
 export {
   formatCurrency,
