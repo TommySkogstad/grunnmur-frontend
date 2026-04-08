@@ -1,5 +1,5 @@
 {
-  "name": "@grunnmur/frontend-core",
+  "name": "@tommyskogstad/frontend-core",
   "version": "1.0.0",
   "description": "Felles frontend-bibliotek for Kotlin/Ktor-apper",
   "type": "module",
