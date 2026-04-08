@@ -31,6 +31,8 @@ import type { ApiClient } from '../api/apiClient'
 import { ApiError } from '../api/apiClient'
 import { createAuthApi } from './authApi'
 import type { AuthApiConfig, LoginResponse } from './authApi'
+import { createProtectedRoute } from '../components/ProtectedRoute'
+import type { ProtectedRouteProps } from '../components/ProtectedRoute'
 
 /** Verdier eksponert av useAuth() */
 export interface AuthContextValue<TUser> {
@@ -69,6 +71,7 @@ export interface AuthProviderConfig<TUser> extends AuthApiConfig {
 export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
   AuthProvider: React.FC<{ children: ReactNode }>
   useAuth: () => AuthContextValue<TUser>
+  ProtectedRoute: React.FC<ProtectedRouteProps<TUser>>
 } {
   const {
     apiClient,
@@ -149,5 +152,7 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
     return context
   }
 
-  return { AuthProvider, useAuth }
+  const ProtectedRoute = createProtectedRoute<TUser>(useAuth)
+
+  return { AuthProvider, useAuth, ProtectedRoute }
 }
