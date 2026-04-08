@@ -125,6 +125,7 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
 
     // Sjekk sesjon ved mount
     useEffect(() => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState i async callback er trygt
       fetchUser().finally(() => setIsLoading(false))
     }, [fetchUser])
 

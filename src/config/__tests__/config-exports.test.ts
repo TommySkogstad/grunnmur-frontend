@@ -36,16 +36,22 @@ describe('Eksporterbar eslint-config', () => {
     expect(hasReactHooks).toBe(true)
   })
 
-  it('har no-unused-vars som warn med argsIgnorePattern (siste config vinner)', async () => {
+  it('har no-unused-vars som warn med argsIgnorePattern for produksjonskode', async () => {
     const mod = await import(eslintConfigPath)
     const config = mod.default as Array<Record<string, unknown>>
-    // Finn siste entry med no-unused-vars (den som vinner i flat config)
-    const withRules = config.filter(
-      (c) => c.rules && typeof c.rules === 'object' && '@typescript-eslint/no-unused-vars' in (c.rules as Record<string, unknown>)
+    // Finn siste non-test entry med no-unused-vars (den som vinner for produksjonskode)
+    const prodEntries = config.filter(
+      (c) =>
+        c.rules &&
+        typeof c.rules === 'object' &&
+        '@typescript-eslint/no-unused-vars' in (c.rules as Record<string, unknown>) &&
+        c.files &&
+        Array.isArray(c.files) &&
+        (c.files as string[]).some((f) => f.includes('*.{ts,tsx}') && !f.includes('test'))
     )
-    expect(withRules.length).toBeGreaterThan(0)
-    const lastEntry = withRules[withRules.length - 1]
-    const rule = (lastEntry.rules as Record<string, unknown>)['@typescript-eslint/no-unused-vars']
+    expect(prodEntries.length).toBeGreaterThan(0)
+    const prodEntry = prodEntries[prodEntries.length - 1]
+    const rule = (prodEntry.rules as Record<string, unknown>)['@typescript-eslint/no-unused-vars']
     expect(Array.isArray(rule)).toBe(true)
     expect((rule as unknown[])[0]).toBe('warn')
     expect((rule as unknown[])[1]).toHaveProperty('argsIgnorePattern', '^_')
