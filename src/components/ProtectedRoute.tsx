@@ -62,7 +62,7 @@ export function createProtectedRoute<TUser>(
       return <Navigate to={loginPath} replace />
     }
 
-    if (roleCheck && user && !roleCheck(user)) {
+    if (roleCheck && (!user || !roleCheck(user))) {
       return <Navigate to={unauthorizedPath ?? loginPath} replace />
     }
 

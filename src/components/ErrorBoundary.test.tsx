@@ -92,4 +92,28 @@ describe('ErrorBoundary', () => {
     const wrapper = container.firstElementChild
     expect(wrapper?.className).toBe('min-error-klasse')
   })
+
+  it('reset-funksjonen nullstiller feilen og re-rendrer children', async () => {
+    const { fireEvent } = await import('@testing-library/react')
+    let shouldThrow = true
+
+    function ConditionalThrow() {
+      if (shouldThrow) throw new Error('Midlertidig feil')
+      return <p>Gjenopprettet</p>
+    }
+
+    render(
+      <ErrorBoundary
+        fallback={(error, reset) => (
+          <button onClick={() => { shouldThrow = false; reset() }}>Reset</button>
+        )}
+      >
+        <ConditionalThrow />
+      </ErrorBoundary>
+    )
+
+    expect(screen.getByText('Reset')).toBeDefined()
+    fireEvent.click(screen.getByText('Reset'))
+    expect(screen.getByText('Gjenopprettet')).toBeDefined()
+  })
 })

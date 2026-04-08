@@ -3,8 +3,8 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render, screen, cleanup } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { createProtectedRoute } from './ProtectedRoute'
 import type { AuthContextValue } from '../auth/AuthContext'
@@ -29,6 +29,10 @@ interface TestUser {
 }
 
 describe('createProtectedRoute', () => {
+  afterEach(() => {
+    cleanup()
+  })
+
   it('redirecter til loginPath når bruker ikke er autentisert', () => {
     const useAuth = createMockUseAuth<TestUser>({ isAuthenticated: false })
     const ProtectedRoute = createProtectedRoute(useAuth)
@@ -178,6 +182,31 @@ describe('createProtectedRoute', () => {
     const useAuth = createMockUseAuth<TestUser>({
       isAuthenticated: true,
       user: { id: 1, email: 'test@test.no', role: 'user' },
+    })
+    const ProtectedRoute = createProtectedRoute(useAuth)
+
+    render(
+      <MemoryRouter initialEntries={['/admin']}>
+        <Routes>
+          <Route path="/logg-inn" element={<p>Innlogging</p>} />
+          <Route
+            element={
+              <ProtectedRoute roleCheck={(user) => user.role === 'admin'} />
+            }
+          >
+            <Route path="/admin" element={<p>Admin</p>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText('Innlogging')).toBeDefined()
+  })
+
+  it('avviser med roleCheck når isAuthenticated men user er null', () => {
+    const useAuth = createMockUseAuth<TestUser>({
+      isAuthenticated: true,
+      user: null,
     })
     const ProtectedRoute = createProtectedRoute(useAuth)
 
