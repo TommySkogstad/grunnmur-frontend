@@ -13,3 +13,9 @@ export const VERSION = '0.0.1'
 // API-klient
 export { createApiClient, ApiError } from './api/apiClient'
 export type { ApiClientConfig, RequestOptions, ApiClient } from './api/apiClient'
+
+// Auth
+export { createAuthProvider } from './auth/AuthContext'
+export type { AuthContextValue, AuthProviderConfig } from './auth/AuthContext'
+export { createAuthApi } from './auth/authApi'
+export type { AuthApi, AuthApiConfig, LoginResponse } from './auth/authApi'
