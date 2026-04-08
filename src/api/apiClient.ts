@@ -162,7 +162,15 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
     if (!text) {
       return null as T
     }
-    return JSON.parse(text) as T
+    try {
+      return JSON.parse(text) as T
+    } catch {
+      throw new ApiError(
+        'Ugyldig JSON i respons',
+        response.status,
+        response.statusText
+      )
+    }
   }
 
   async function request<T>(path: string, options?: RequestOptions): Promise<T> {

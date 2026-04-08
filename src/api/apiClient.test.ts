@@ -339,6 +339,41 @@ describe('request', () => {
     const [, init] = mockFetch.mock.calls[0]
     expect(init.headers['X-Custom']).toBe('value')
   })
+
+  it('leser korrekt csrf_token fra flere cookies', async () => {
+    document.cookie = 'session=abc123; csrf_token=correct-token; other=xyz'
+    mockFetch.mockResolvedValueOnce(mockResponse({ ok: true }))
+
+    const client = createApiClient()
+    await client.request('/test', { method: 'POST' })
+
+    const [, init] = mockFetch.mock.calls[0]
+    expect(init.headers['X-CSRF-Token']).toBe('correct-token')
+  })
+
+  it('kaster ApiError ved ugyldig JSON i vellykket respons', async () => {
+    mockFetch.mockResolvedValueOnce(new Response('ikke json!', { status: 200, statusText: 'OK' }))
+
+    const client = createApiClient()
+
+    try {
+      await client.request('/test')
+      expect.fail('Skulle ha kastet ApiError')
+    } catch (e) {
+      expect(e).toBeInstanceOf(ApiError)
+      const err = e as ApiError
+      expect(err.message).toBe('Ugyldig JSON i respons')
+      expect(err.status).toBe(200)
+    }
+  })
+
+  it('propagerer nettverksfeil som TypeError', async () => {
+    mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+
+    const client = createApiClient()
+
+    await expect(client.request('/test')).rejects.toThrow(TypeError)
+  })
 })
 
 // ============================================================
