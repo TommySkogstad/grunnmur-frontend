@@ -50,6 +50,14 @@ describe('formatDate', () => {
   it('returnerer tankestrek for ugyldig dato', () => {
     expect(formatDate('ugyldig')).toBe('\u2013')
   })
+
+  it('returnerer tankestrek for null', () => {
+    expect(formatDate(null as unknown as string)).toBe('\u2013')
+  })
+
+  it('returnerer tankestrek for undefined', () => {
+    expect(formatDate(undefined as unknown as string)).toBe('\u2013')
+  })
 })
 
 describe('formatDateTime', () => {

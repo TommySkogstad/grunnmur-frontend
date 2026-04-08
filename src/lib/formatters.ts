@@ -14,6 +14,7 @@ let relativeFmt: Intl.RelativeTimeFormat
 
 /** Konverterer string | Date til Date, eller null ved ugyldig input */
 function toDate(input: string | Date): Date | null {
+  if (input == null) return null
   const d = input instanceof Date ? input : new Date(input)
   return isNaN(d.getTime()) ? null : d
 }
@@ -44,13 +45,20 @@ export function formatDateTime(date: string | Date): string {
   return dateTimeFmt.format(d)
 }
 
+// Cache for formatNumber med ulike desimalverdier
+const numberFmtCache = new Map<number | undefined, Intl.NumberFormat>()
+
 /** Formaterer tall med norsk tusenskilletegn og valgfritt antall desimaler */
 export function formatNumber(num: number, decimals?: number): string {
   if (!isFinite(num)) return DASH
-  const fmt = new Intl.NumberFormat(LOCALE, {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
-  })
+  let fmt = numberFmtCache.get(decimals)
+  if (!fmt) {
+    fmt = new Intl.NumberFormat(LOCALE, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    })
+    numberFmtCache.set(decimals, fmt)
+  }
   return fmt.format(num)
 }
 
