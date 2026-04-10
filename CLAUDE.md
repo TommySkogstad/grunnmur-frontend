@@ -70,13 +70,15 @@ npm run lint      # ESLint
 - Tynn og stabil — konfigurasjon via callbacks, ikke feature-flags
 - Alle eksporterte funksjoner skal ha JSDoc-kommentarer
 
-## Viktig: `.dockerignore` ekskluderer runtime-React
+## Viktig: `.dockerignore` ekskluderer runtime-React og react-router
 
 `.dockerignore` i rota ekskluderer:
 
 ```
 node_modules/react
 node_modules/react-dom
+node_modules/react-router
+node_modules/react-router-dom
 node_modules/.package-lock.json
 ```
 
@@ -88,20 +90,28 @@ React-instanser i bundlet (en fra grunnmurs node_modules, en fra konsumentens
 egen) — og alle hooks fra grunnmur (AuthProvider, ErrorBoundary etc.) krasjer
 med `Cannot read properties of null (reading 'useState')` på initial render.
 
-Dette traff biologportal og lo-finans hardt 2026-04-10 — fire påfølgende
-deploys i biologportal feilet smoke-test [7/7] før rotårsaken ble identifisert.
-Se PR #24 og hvit side-incident i memory for full historikk.
+Samme bug rammer `react-router-dom`: grunnmur har v7 i devDependencies, mens
+konsumentene bruker v6. Når grunnmurs `node_modules/react-router-dom@7.x`
+kopieres inn, bundler Vite to instanser. Grunnmurs `ProtectedRoute` bruker
+`Outlet`/`Navigate` fra v7, mens konsumentens `<BrowserRouter>` bruker v6 sitt
+Router-context — resultatet er at `<Outlet>` rendrer ingenting (silent) og
+`<Navigate>` kaster «may be used only in the context of a \<Router\> component».
+Se issue #26 og biologportal-incidenten 2026-04-10.
+
+React-incidenten (runde 1) traff biologportal og lo-finans 2026-04-10 — fire
+påfølgende deploys i biologportal feilet smoke-test [7/7] før rotårsaken ble
+identifisert. Se PR #24 og hvit side-incident i memory for full historikk.
 
 **Hva som fortsatt shippes:** `@types/react`, `@types/react-dom`,
-`@tanstack/react-query`, `react-router-dom` og resten av `node_modules/`.
+`@tanstack/react-query` og resten av `node_modules/`.
 Konsumentene trenger dette for at `tsc -b` skal kunne resolve type-imports
 fra våre kompilerte `.d.ts`-filer (uten `@types/react` feiler kompilering med
 `'ErrorBoundary' cannot be used as a JSX component`).
 
 **Hva som er trygt å fjerne hvis du må kutte build-context-størrelse senere:**
-Kun `react` og `react-dom`. Ikke fjern `@types/react` eller `node_modules` som
-helhet. React er en `peerDependency` her, så konsumentene har alltid sin egen
-runtime React tilgjengelig.
+Kun `react`, `react-dom`, `react-router` og `react-router-dom`. Ikke fjern
+`@types/react` eller `node_modules` som helhet. Disse er `peerDependencies`
+her, så konsumentene har alltid sine egne runtime-versjoner tilgjengelig.
 
 **Fjern aldri `.dockerignore` uten å varsle alle konsumenter** — fjerning
 gjeninnfører bug-en. Hver konsument har en defensiv `RUN rm -rf` i sine egne
