@@ -5,6 +5,8 @@
 # Vi beholder @types/react etc. så TypeScript-kompilering fortsatt fungerer.
 node_modules/react
 node_modules/react-dom
+node_modules/react-router
+node_modules/react-router-dom
 node_modules/.package-lock.json
 .git
 coverage
