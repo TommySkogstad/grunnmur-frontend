@@ -1,0 +1,11 @@
+# Forhindrer at konsumenter (biologportal/lo-finans/6810/styreportal) får
+# TO React-instanser i bundle. Grunnmur installerer react/react-dom i sine
+# devDependencies (for tester), men de skal IKKE shippes til consumers —
+# react er en peerDependency og må komme fra konsumentens egen node_modules.
+# Vi beholder @types/react etc. så TypeScript-kompilering fortsatt fungerer.
+node_modules/react
+node_modules/react-dom
+node_modules/.package-lock.json
+.git
+coverage
+*.log
