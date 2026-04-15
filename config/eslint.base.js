@@ -4,7 +4,7 @@
  * Bruk i app:
  * ```js
  * // eslint.config.js
- * import baseConfig from '@grunnmur/frontend-core/eslint-config'
+ * import baseConfig from '@tommyskogstad/frontend-core/eslint-config'
  * export default [
  *   ...baseConfig,
  *   { rules: { /* app-spesifikke overrides * / } }

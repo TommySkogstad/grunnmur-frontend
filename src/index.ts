@@ -1,5 +1,5 @@
 /**
- * @grunnmur/frontend-core
+ * @tommyskogstad/frontend-core
  * Felles frontend-bibliotek for Kotlin/Ktor-apper.
  *
  * @see README.md for API-referanse og konfigurasjon
