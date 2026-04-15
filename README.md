@@ -1,17 +1,17 @@
-# @grunnmur/frontend-core
+# @tommyskogstad/frontend-core
 
 Felles frontend-bibliotek for Kotlin/Ktor-appene i portefoljen. Tilsvarer `grunnmur` (Kotlin-bibliotek) for backend, men for React/TypeScript frontend.
 
 ## Installasjon
 
-Pakken publiseres til GitHub Packages (privat, `@grunnmur` scope).
+Pakken publiseres til GitHub Packages (privat, `@tommyskogstad` scope).
 
 ### 1. Autentisering mot GitHub Packages
 
 Opprett eller rediger `~/.npmrc`:
 
 ```
-@grunnmur:registry=https://npm.pkg.github.com
+@tommyskogstad:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=ghp_DIN_TOKEN
 ```
 
@@ -20,7 +20,7 @@ Tokenet trenger `read:packages` scope. Generer det under [GitHub Settings > Deve
 ### 2. Installer pakken
 
 ```bash
-npm install @grunnmur/frontend-core
+npm install @tommyskogstad/frontend-core
 ```
 
 ### Peer dependencies
@@ -42,7 +42,7 @@ import {
   createAuthProvider,
   ErrorBoundary,
   formatCurrency,
-} from '@grunnmur/frontend-core'
+} from '@tommyskogstad/frontend-core'
 
 // 1. Opprett API-klient
 const api = createApiClient({
@@ -81,8 +81,8 @@ function App() {
 Konfigurerbar fetch-wrapper med CSRF-tokenhandtering, JSON-serialisering, 401-deduplisering og FormData-stotte.
 
 ```ts
-import { createApiClient } from '@grunnmur/frontend-core'
-import type { ApiClientConfig, ApiClient, RequestOptions } from '@grunnmur/frontend-core'
+import { createApiClient } from '@tommyskogstad/frontend-core'
+import type { ApiClientConfig, ApiClient, RequestOptions } from '@tommyskogstad/frontend-core'
 
 const api = createApiClient({
   basePath: '/api',              // URL-prefiks (default: '/api')
@@ -126,7 +126,7 @@ await api.formDataRequest('/upload', formData)
 **`ApiError`** — strukturert feilklasse:
 
 ```ts
-import { ApiError } from '@grunnmur/frontend-core'
+import { ApiError } from '@tommyskogstad/frontend-core'
 
 try {
   await api.request('/protected')
@@ -147,8 +147,8 @@ try {
 Factory-funksjon som oppretter en typet AuthProvider, useAuth-hook og ProtectedRoute bundet til en felles auth-kontekst.
 
 ```ts
-import { createAuthProvider } from '@grunnmur/frontend-core'
-import type { AuthProviderConfig, AuthContextValue } from '@grunnmur/frontend-core'
+import { createAuthProvider } from '@tommyskogstad/frontend-core'
+import type { AuthProviderConfig, AuthContextValue } from '@tommyskogstad/frontend-core'
 
 interface MyUser { id: number; email: string; role: string }
 
@@ -203,8 +203,8 @@ function Dashboard() {
 Lavniva auth-API for apper som trenger direkte kontroll over auth-flyten uten AuthProvider.
 
 ```ts
-import { createAuthApi } from '@grunnmur/frontend-core'
-import type { AuthApi, AuthApiConfig, LoginResponse } from '@grunnmur/frontend-core'
+import { createAuthApi } from '@tommyskogstad/frontend-core'
+import type { AuthApi, AuthApiConfig, LoginResponse } from '@tommyskogstad/frontend-core'
 
 const authApi = createAuthApi(api, {
   requestCodeEndpoint: '/auth/request-code',
@@ -226,8 +226,8 @@ await authApi.logout()
 Styling-agnostisk error boundary som fanger ubehandlede feil i React-komponenttreet.
 
 ```tsx
-import { ErrorBoundary } from '@grunnmur/frontend-core'
-import type { ErrorBoundaryProps } from '@grunnmur/frontend-core'
+import { ErrorBoundary } from '@tommyskogstad/frontend-core'
+import type { ErrorBoundaryProps } from '@tommyskogstad/frontend-core'
 
 // Standard fallback (viser "Noe gikk galt")
 <ErrorBoundary>
@@ -263,8 +263,8 @@ import type { ErrorBoundaryProps } from '@grunnmur/frontend-core'
 Factory-funksjon for rutebeskyttelse. Returneres automatisk fra `createAuthProvider()`, men kan ogsa brukes separat.
 
 ```tsx
-import { createProtectedRoute } from '@grunnmur/frontend-core'
-import type { ProtectedRouteProps } from '@grunnmur/frontend-core'
+import { createProtectedRoute } from '@tommyskogstad/frontend-core'
+import type { ProtectedRouteProps } from '@tommyskogstad/frontend-core'
 
 const ProtectedRoute = createProtectedRoute(useAuth)
 
@@ -298,7 +298,7 @@ const ProtectedRoute = createProtectedRoute(useAuth)
 Oppretter en `@tanstack/react-query` QueryClient med fornuftige defaults.
 
 ```ts
-import { createQueryClient } from '@grunnmur/frontend-core'
+import { createQueryClient } from '@tommyskogstad/frontend-core'
 
 const queryClient = createQueryClient()
 // Defaults: staleTime: 5min, retry: 1, gcTime: 5min
@@ -326,7 +326,7 @@ import {
   formatNumber,
   formatFileSize,
   relativeTime,
-} from '@grunnmur/frontend-core'
+} from '@tommyskogstad/frontend-core'
 ```
 
 | Funksjon | Eksempel input | Eksempel output |
@@ -350,7 +350,7 @@ Pakken eksporterer ogsa ESLint-config og base tsconfig for konsistent oppsett pa
 
 ```js
 // eslint.config.js i din app
-import grunnmurConfig from '@grunnmur/frontend-core/eslint-config'
+import grunnmurConfig from '@tommyskogstad/frontend-core/eslint-config'
 
 export default [
   ...grunnmurConfig,
@@ -363,7 +363,7 @@ export default [
 ```json
 // tsconfig.json i din app
 {
-  "extends": "@grunnmur/frontend-core/tsconfig",
+  "extends": "@tommyskogstad/frontend-core/tsconfig",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src"
@@ -465,7 +465,7 @@ const response = await fetch('/api/users', {
 
 **Etter:**
 ```ts
-import { createApiClient } from '@grunnmur/frontend-core'
+import { createApiClient } from '@tommyskogstad/frontend-core'
 
 const api = createApiClient()
 const users = await api.request<User[]>('/users')
@@ -483,7 +483,7 @@ export function useAuth() { ... }
 
 **Etter:**
 ```tsx
-import { createAuthProvider } from '@grunnmur/frontend-core'
+import { createAuthProvider } from '@tommyskogstad/frontend-core'
 
 const { AuthProvider, useAuth, ProtectedRoute } = createAuthProvider<MyUser>({
   apiClient: api,
@@ -503,7 +503,7 @@ const { AuthProvider, useAuth, ProtectedRoute } = createAuthProvider<MyUser>({
 
 **Etter:**
 ```tsx
-import { ErrorBoundary } from '@grunnmur/frontend-core'
+import { ErrorBoundary } from '@tommyskogstad/frontend-core'
 
 <ErrorBoundary
   fallback={(error, reset) => (

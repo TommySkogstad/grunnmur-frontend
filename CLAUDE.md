@@ -2,7 +2,7 @@
 
 ## Prosjektoversikt
 
-**@grunnmur/frontend-core** — Felles frontend-bibliotek for Kotlin/Ktor-appene i porteføljen.
+**@tommyskogstad/frontend-core** — Felles frontend-bibliotek for Kotlin/Ktor-appene i porteføljen.
 
 Tilsvarer `grunnmur` (Kotlin-bibliotek) for backend, men for React/TypeScript frontend.
 
@@ -11,7 +11,7 @@ Tilsvarer `grunnmur` (Kotlin-bibliotek) for backend, men for React/TypeScript fr
 - **Språk**: TypeScript 5.7+
 - **Framework**: React 18/19
 - **Test**: Vitest + Testing Library
-- **Publisering**: GitHub Packages (privat, @grunnmur scope)
+- **Publisering**: GitHub Packages (privat, @tommyskogstad scope)
 - **Byggesystem**: tsc (TypeScript compiler)
 
 ## Kommandoer

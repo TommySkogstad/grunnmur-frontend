@@ -6,7 +6,7 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [1.0.0] - 2026-04-08
 
-Forste stabile release av `@grunnmur/frontend-core`.
+Forste stabile release av `@tommyskogstad/frontend-core`.
 
 ### Lagt til
 
@@ -43,8 +43,8 @@ Forste stabile release av `@grunnmur/frontend-core`.
 - `relativeTime` — relativ tid pa norsk ("2 timer siden", "om 3 dager")
 
 #### Delt konfigurasjon
-- Eksporterbar ESLint-config (`@grunnmur/frontend-core/eslint-config`)
-- Base tsconfig (`@grunnmur/frontend-core/tsconfig`)
+- Eksporterbar ESLint-config (`@tommyskogstad/frontend-core/eslint-config`)
+- Base tsconfig (`@tommyskogstad/frontend-core/tsconfig`)
 
 ### Teknisk
 
@@ -52,4 +52,4 @@ Forste stabile release av `@grunnmur/frontend-core`.
 - React 18/19 stotte
 - react-router-dom 6/7 stotte
 - Vitest + Testing Library for tester
-- Publisert til GitHub Packages (privat, `@grunnmur` scope)
+- Publisert til GitHub Packages (privat, `@tommyskogstad` scope)
