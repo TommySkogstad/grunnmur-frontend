@@ -319,6 +319,41 @@ describe('createAuthProvider', () => {
     expect(screen.getByTestId('user').textContent).toBe('ola@example.com')
   })
 
+  it('useSessionEndpoint=true: session-feil (500) setter user=null og avslutter loading', async () => {
+    vi.mocked(mockClient.request).mockRejectedValue(
+      new ApiError('Server error', 500, 'Internal Server Error')
+    )
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+      useSessionEndpoint: true,
+    })
+
+    function TestComponent() {
+      const { isAuthenticated, isLoading, user } = useAuth()
+      return (
+        <div>
+          <span data-testid="loading">{String(isLoading)}</span>
+          <span data-testid="auth">{String(isAuthenticated)}</span>
+          <span data-testid="user">{user ? user.email : 'null'}</span>
+        </div>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').textContent).toBe('false')
+    })
+
+    expect(screen.getByTestId('auth').textContent).toBe('false')
+    expect(screen.getByTestId('user').textContent).toBe('null')
+  })
+
   it('useSessionEndpoint=true: parseUser brukes på user fra session-respons', async () => {
     interface CustomUser {
       userId: number
