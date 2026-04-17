@@ -65,7 +65,7 @@ export interface AuthApiConfig {
  *
  * @param apiClient - API-klient fra createApiClient()
  * @param config - Valgfri konfigurasjon av endepunkter
- * @returns AuthApi med requestCode, verifyCode, getMe, logout
+ * @returns AuthApi med requestCode, verifyCode, getMe, getSession, logout
  */
 export function createAuthApi(apiClient: ApiClient, config?: AuthApiConfig): AuthApi {
   const requestCodeEndpoint = config?.requestCodeEndpoint ?? '/auth/request-code'
