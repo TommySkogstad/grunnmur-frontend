@@ -58,8 +58,16 @@ export interface AuthProviderConfig<TUser> extends AuthApiConfig {
   loginPath?: string
   /** Callback ved utlogging — f.eks. queryClient.clear() */
   onLogout?: () => void
-  /** Custom parsing av brukerdata fra /me-endepunktet */
+  /** Custom parsing av brukerdata fra /me- eller /session-endepunktet */
   parseUser?: (data: unknown) => TUser
+  /**
+   * Bruk session-endepunkt (2xx for både anonyme og autentiserte) i stedet for
+   * /me (som returnerer 401 for anonyme og logger nettverksfeil i konsollen).
+   *
+   * Krever at backend returnerer `{ authenticated: boolean, user?: TUser }` på
+   * `sessionEndpoint` (default: `/auth/session`). Default: false.
+   */
+  useSessionEndpoint?: boolean
 }
 
 /**
@@ -77,6 +85,7 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
     apiClient,
     onLogout: onLogoutCallback,
     parseUser,
+    useSessionEndpoint,
     ...authApiConfig
   } = config
 
@@ -91,6 +100,16 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
 
     const fetchUser = useCallback(async () => {
       try {
+        if (useSessionEndpoint) {
+          const session = await authApi.getSession<TUser>()
+          if (!session.authenticated || session.user === undefined) {
+            setUser(null)
+            return
+          }
+          const parsed = parseUser ? parseUser(session.user) : (session.user as TUser)
+          setUser(parsed)
+          return
+        }
         const data = await authApi.getMe<TUser>()
         const parsed = parseUser ? parseUser(data) : data
         setUser(parsed)
