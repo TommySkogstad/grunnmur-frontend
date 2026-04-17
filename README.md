@@ -157,12 +157,30 @@ const { AuthProvider, useAuth, ProtectedRoute } = createAuthProvider<MyUser>({
   loginPath: '/logg-inn',                 // Sti til innloggingsside (default: '/login')
   onLogout: () => queryClient.clear(),    // Callback ved utlogging
   parseUser: (data) => data as MyUser,    // Custom parsing av /me-respons
+  // Unngå 401-logging i konsollen (krever at backend returnerer 2xx på /auth/session):
+  useSessionEndpoint: true,               // Bruk session-endepunkt i stedet for /me
   // Valgfrie endepunkt-overrides:
   requestCodeEndpoint: '/auth/request-code',  // default
   verifyCodeEndpoint: '/auth/verify-code',    // default
   meEndpoint: '/auth/me',                     // default
   logoutEndpoint: '/auth/logout',             // default
+  sessionEndpoint: '/auth/session',           // default
 })
+```
+
+**Session-endepunkt** — når `useSessionEndpoint: true`, kaller `AuthProvider`
+`sessionEndpoint` i stedet for `meEndpoint` ved initial sesjonssjekk.
+Backend må da returnere 2xx med `{ authenticated: boolean, user?: TUser }`
+slik at nettleseren ikke logger 401-nettverksfeil i konsollen for anonyme
+brukere (Lighthouse `errors-in-console`). `getMe` beholdes uendret for
+bakoverkompatibilitet.
+
+```ts
+// Autentisert respons
+{ "authenticated": true, "user": { "id": 1, "email": "ola@example.com" } }
+
+// Anonym respons (fortsatt HTTP 200)
+{ "authenticated": false }
 ```
 
 **`AuthProvider`** — wrapper-komponent som handterer sesjon:

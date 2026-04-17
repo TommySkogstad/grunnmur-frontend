@@ -21,6 +21,17 @@ export interface LoginResponse {
   csrfToken?: string
 }
 
+/**
+ * Respons fra getSession — returnerer 2xx for både autentiserte og anonyme
+ * brukere, slik at nettleseren ikke logger 401 i konsollen ved sessjonssjekk.
+ */
+export interface SessionResponse<TUser = unknown> {
+  /** Om bruker er autentisert */
+  authenticated: boolean
+  /** Brukerdata (kun satt når authenticated=true) */
+  user?: TUser
+}
+
 /** Auth-API returnert av createAuthApi() */
 export interface AuthApi {
   /** Send engangskode til e-post */
@@ -29,6 +40,8 @@ export interface AuthApi {
   verifyCode: (email: string, code: string) => Promise<LoginResponse>
   /** Hent innlogget bruker */
   getMe: <TUser>() => Promise<TUser>
+  /** Hent sesjonsstatus (2xx både for anonyme og autentiserte) */
+  getSession: <TUser>() => Promise<SessionResponse<TUser>>
   /** Logg ut */
   logout: () => Promise<void>
 }
@@ -43,6 +56,8 @@ export interface AuthApiConfig {
   meEndpoint?: string
   /** Endepunkt for utlogging (default: '/auth/logout') */
   logoutEndpoint?: string
+  /** Endepunkt for sesjonssjekk (default: '/auth/session') */
+  sessionEndpoint?: string
 }
 
 /**
@@ -57,6 +72,7 @@ export function createAuthApi(apiClient: ApiClient, config?: AuthApiConfig): Aut
   const verifyCodeEndpoint = config?.verifyCodeEndpoint ?? '/auth/verify-code'
   const meEndpoint = config?.meEndpoint ?? '/auth/me'
   const logoutEndpoint = config?.logoutEndpoint ?? '/auth/logout'
+  const sessionEndpoint = config?.sessionEndpoint ?? '/auth/session'
 
   async function requestCode(email: string): Promise<void> {
     await apiClient.request<void>(requestCodeEndpoint, {
@@ -76,11 +92,15 @@ export function createAuthApi(apiClient: ApiClient, config?: AuthApiConfig): Aut
     return apiClient.request<TUser>(meEndpoint)
   }
 
+  async function getSession<TUser>(): Promise<SessionResponse<TUser>> {
+    return apiClient.request<SessionResponse<TUser>>(sessionEndpoint)
+  }
+
   async function logout(): Promise<void> {
     await apiClient.request<void>(logoutEndpoint, {
       method: 'POST',
     })
   }
 
-  return { requestCode, verifyCode, getMe, logout }
+  return { requestCode, verifyCode, getMe, getSession, logout }
 }

@@ -4,6 +4,12 @@ Alle vesentlige endringer i dette prosjektet dokumenteres her.
 Formatet er basert pa [Keep a Changelog](https://keepachangelog.com/nb-NO/1.1.0/),
 og prosjektet folger [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Lagt til
+- `authApi.getSession<TUser>()` — sesjonssjekk mot `/auth/session` (konfigurerbar via `sessionEndpoint`) som returnerer `{ authenticated, user? }`. Lar backend svare 2xx for anonyme brukere slik at nettleseren ikke logger 401 i konsollen (Lighthouse `errors-in-console`).
+- `AuthProviderConfig.useSessionEndpoint` — flagg som faar `AuthProvider` til aa bruke `getSession` i stedet for `getMe` ved initial sesjonssjekk. `getMe` beholdes uendret for bakoverkompatibilitet.
+
 ## [1.0.0] - 2026-04-08
 
 Forste stabile release av `@tommyskogstad/frontend-core`.

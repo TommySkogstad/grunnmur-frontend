@@ -242,6 +242,166 @@ describe('createAuthProvider', () => {
     spy.mockRestore()
   })
 
+  it('useSessionEndpoint=true: anonym session setter user=null uten å kalle getMe', async () => {
+    const calls: string[] = []
+    vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
+      calls.push(path)
+      if (path === '/auth/session') return { authenticated: false }
+      throw new Error(`Uventet kall til ${path}`)
+    })
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+      useSessionEndpoint: true,
+    })
+
+    function TestComponent() {
+      const { isAuthenticated, isLoading, user } = useAuth()
+      return (
+        <div>
+          <span data-testid="loading">{String(isLoading)}</span>
+          <span data-testid="auth">{String(isAuthenticated)}</span>
+          <span data-testid="user">{user ? user.email : 'null'}</span>
+        </div>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').textContent).toBe('false')
+    })
+
+    expect(screen.getByTestId('auth').textContent).toBe('false')
+    expect(screen.getByTestId('user').textContent).toBe('null')
+    expect(calls).toEqual(['/auth/session'])
+    expect(calls).not.toContain('/auth/me')
+  })
+
+  it('useSessionEndpoint=true: autentisert session setter user direkte', async () => {
+    vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
+      if (path === '/auth/session') {
+        return { authenticated: true, user: testUser }
+      }
+      throw new Error(`Uventet kall til ${path}`)
+    })
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+      useSessionEndpoint: true,
+    })
+
+    function TestComponent() {
+      const { isAuthenticated, isLoading, user } = useAuth()
+      return (
+        <div>
+          <span data-testid="loading">{String(isLoading)}</span>
+          <span data-testid="auth">{String(isAuthenticated)}</span>
+          <span data-testid="user">{user ? user.email : 'null'}</span>
+        </div>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth').textContent).toBe('true')
+    })
+
+    expect(screen.getByTestId('user').textContent).toBe('ola@example.com')
+  })
+
+  it('useSessionEndpoint=true: parseUser brukes på user fra session-respons', async () => {
+    interface CustomUser {
+      userId: number
+      displayName: string
+    }
+
+    vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
+      if (path === '/auth/session') {
+        return {
+          authenticated: true,
+          user: { user_id: 42, display_name: 'Kari' },
+        }
+      }
+      throw new Error(`Uventet kall til ${path}`)
+    })
+
+    const { AuthProvider, useAuth } = createAuthProvider<CustomUser>({
+      apiClient: mockClient,
+      useSessionEndpoint: true,
+      parseUser: (data) => {
+        const raw = data as { user_id: number; display_name: string }
+        return { userId: raw.user_id, displayName: raw.display_name }
+      },
+    })
+
+    function TestComponent() {
+      const { user, isLoading } = useAuth()
+      return (
+        <div>
+          <span data-testid="loading">{String(isLoading)}</span>
+          <span data-testid="name">{user ? user.displayName : 'null'}</span>
+        </div>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').textContent).toBe('false')
+    })
+
+    expect(screen.getByTestId('name').textContent).toBe('Kari')
+  })
+
+  it('uten useSessionEndpoint: getMe kalles som før (bakoverkompatibilitet)', async () => {
+    const calls: string[] = []
+    vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
+      calls.push(path)
+      if (path === '/auth/me') return testUser
+      throw new Error(`Uventet kall til ${path}`)
+    })
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+    })
+
+    function TestComponent() {
+      const { isAuthenticated, isLoading } = useAuth()
+      return (
+        <div>
+          <span data-testid="loading">{String(isLoading)}</span>
+          <span data-testid="auth">{String(isAuthenticated)}</span>
+        </div>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth').textContent).toBe('true')
+    })
+
+    expect(calls).toEqual(['/auth/me'])
+  })
+
   it('refreshUser henter brukerdata på nytt', async () => {
     let refreshCount = 0
     vi.mocked(mockClient.request).mockImplementation(async (path: string) => {

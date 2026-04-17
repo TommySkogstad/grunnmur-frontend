@@ -77,6 +77,7 @@ describe('createAuthApi', () => {
       verifyCodeEndpoint: '/custom/verify',
       meEndpoint: '/custom/me',
       logoutEndpoint: '/custom/logout',
+      sessionEndpoint: '/custom/session',
     })
 
     await authApi.requestCode('ola@example.com')
@@ -87,5 +88,33 @@ describe('createAuthApi', () => {
 
     await authApi.logout()
     expect(mockClient.request).toHaveBeenCalledWith('/custom/logout', expect.any(Object))
+
+    vi.mocked(mockClient.request).mockResolvedValue({ authenticated: false })
+    await authApi.getSession()
+    expect(mockClient.request).toHaveBeenCalledWith('/custom/session')
+  })
+
+  it('getSession returnerer anonym respons fra default-endepunkt', async () => {
+    vi.mocked(mockClient.request).mockResolvedValue({ authenticated: false })
+
+    const authApi = createAuthApi(mockClient)
+    const result = await authApi.getSession()
+
+    expect(mockClient.request).toHaveBeenCalledWith('/auth/session')
+    expect(result).toEqual({ authenticated: false })
+  })
+
+  it('getSession returnerer autentisert respons med user', async () => {
+    const mockUser = { id: 1, email: 'ola@example.com' }
+    vi.mocked(mockClient.request).mockResolvedValue({
+      authenticated: true,
+      user: mockUser,
+    })
+
+    const authApi = createAuthApi(mockClient)
+    const result = await authApi.getSession<typeof mockUser>()
+
+    expect(mockClient.request).toHaveBeenCalledWith('/auth/session')
+    expect(result).toEqual({ authenticated: true, user: mockUser })
   })
 })
