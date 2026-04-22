@@ -23,17 +23,17 @@ npm test          # Kjør tester
 npm run lint      # ESLint
 ```
 
-## Moduler (planlagt)
+## Moduler
 
 | Modul | Beskrivelse | Status |
 |-------|-------------|--------|
-| `api/apiClient` | Konfigurerbar fetch-wrapper med CSRF | Planlagt (#2) |
-| `auth/AuthContext` | Generisk AuthProvider med hooks | Planlagt (#3) |
-| `auth/authApi` | requestCode, verifyCode, getMe, logout | Planlagt (#3) |
-| `components/ErrorBoundary` | Styling-agnostisk error boundary | Planlagt (#4) |
-| `components/ProtectedRoute` | Konfigurerbar med roleCheck callback | Planlagt (#4) |
-| `lib/queryClient` | Standard QueryClient-config | Planlagt (#5) |
-| `lib/formatters` | Dato, valuta, tall | Planlagt (#5) |
+| `api/apiClient` | Konfigurerbar fetch-wrapper med CSRF | Implementert |
+| `auth/AuthContext` | Generisk AuthProvider med hooks | Implementert |
+| `auth/authApi` | requestCode, verifyCode, getMe, logout | Implementert |
+| `components/ErrorBoundary` | Styling-agnostisk error boundary | Implementert |
+| `components/ProtectedRoute` | Konfigurerbar med roleCheck callback | Implementert |
+| `lib/queryClient` | Standard QueryClient-config | Implementert |
+| `lib/formatters` | Dato, valuta, tall | Implementert |
 
 ## Konfigurasjonspunkter
 
