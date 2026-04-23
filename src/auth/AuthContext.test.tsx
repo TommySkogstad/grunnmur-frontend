@@ -438,8 +438,7 @@ describe('createAuthProvider', () => {
   })
 
   it('isLoading er true ved mount og false etter resolve', async () => {
-    const loadingValues: boolean[] = []
-    let resolveMe: (value: TestUser) => void = () => {}
+    let resolveMe: ((value: TestUser) => void) | undefined = undefined
 
     vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
       if (path === '/auth/me') {
@@ -456,7 +455,6 @@ describe('createAuthProvider', () => {
 
     function TestComponent() {
       const { isLoading } = useAuth()
-      loadingValues.push(isLoading)
       return <span data-testid="loading">{String(isLoading)}</span>
     }
 
@@ -466,25 +464,32 @@ describe('createAuthProvider', () => {
       </AuthProvider>
     )
 
-    // Første render skal ha isLoading=true
-    expect(loadingValues[0]).toBe(true)
+    // Initiell render: isLoading=true mens sesjonskall pågår
+    expect(screen.getByTestId('loading').textContent).toBe('true')
+    expect(resolveMe).toBeDefined()
 
     await act(async () => {
-      resolveMe(testUser)
+      resolveMe!(testUser)
     })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('loading').textContent).toBe('false')
-    })
-    expect(loadingValues).toContain(false)
+    expect(screen.getByTestId('loading').textContent).toBe('false')
   })
 
   it('useSessionEndpoint=true: login bruker /auth/session (ikke /auth/me) for bruker-refresh', async () => {
     const calls: string[] = []
+    let authenticated = false
+
     vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
       calls.push(path)
-      if (path === '/auth/session') return { authenticated: true, user: testUser }
-      if (path === '/auth/verify-code') return { csrfToken: 'tok' }
+      if (path === '/auth/session') {
+        return authenticated
+          ? { authenticated: true, user: testUser }
+          : { authenticated: false }
+      }
+      if (path === '/auth/verify-code') {
+        authenticated = true
+        return { csrfToken: 'tok' }
+      }
       throw new Error(`Uventet kall til ${path}`)
     })
 
@@ -496,12 +501,13 @@ describe('createAuthProvider', () => {
     let loginFn: ((email: string, code: string) => Promise<unknown>) | null = null
 
     function TestComponent() {
-      const { isAuthenticated, isLoading, login } = useAuth()
+      const { isAuthenticated, isLoading, user, login } = useAuth()
       loginFn = login
       return (
         <div>
           <span data-testid="loading">{String(isLoading)}</span>
           <span data-testid="auth">{String(isAuthenticated)}</span>
+          <span data-testid="user">{user ? user.email : 'null'}</span>
         </div>
       )
     }
@@ -516,15 +522,19 @@ describe('createAuthProvider', () => {
       expect(screen.getByTestId('loading').textContent).toBe('false')
     })
 
+    // Anonym ved mount
+    expect(screen.getByTestId('auth').textContent).toBe('false')
+
     calls.length = 0 // nullstill for å sjekke kun post-login kall
 
     await act(async () => {
       await loginFn!('ola@example.com', '123456')
     })
 
-    expect(calls).toContain('/auth/session')
-    expect(calls).not.toContain('/auth/me')
+    // Etter login: session-endepunkt brukes (ikke /auth/me), bruker er satt
+    expect(calls).toEqual(['/auth/verify-code', '/auth/session'])
     expect(screen.getByTestId('auth').textContent).toBe('true')
+    expect(screen.getByTestId('user').textContent).toBe('ola@example.com')
   })
 
   it('refreshUser henter brukerdata på nytt', async () => {
