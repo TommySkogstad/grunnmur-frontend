@@ -437,6 +437,96 @@ describe('createAuthProvider', () => {
     expect(calls).toEqual(['/auth/me'])
   })
 
+  it('isLoading er true ved mount og false etter resolve', async () => {
+    const loadingValues: boolean[] = []
+    let resolveMe: (value: TestUser) => void = () => {}
+
+    vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
+      if (path === '/auth/me') {
+        return new Promise<TestUser>((resolve) => {
+          resolveMe = resolve
+        })
+      }
+      return undefined
+    })
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+    })
+
+    function TestComponent() {
+      const { isLoading } = useAuth()
+      loadingValues.push(isLoading)
+      return <span data-testid="loading">{String(isLoading)}</span>
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    // Første render skal ha isLoading=true
+    expect(loadingValues[0]).toBe(true)
+
+    await act(async () => {
+      resolveMe(testUser)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').textContent).toBe('false')
+    })
+    expect(loadingValues).toContain(false)
+  })
+
+  it('useSessionEndpoint=true: login bruker /auth/session (ikke /auth/me) for bruker-refresh', async () => {
+    const calls: string[] = []
+    vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
+      calls.push(path)
+      if (path === '/auth/session') return { authenticated: true, user: testUser }
+      if (path === '/auth/verify-code') return { csrfToken: 'tok' }
+      throw new Error(`Uventet kall til ${path}`)
+    })
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+      useSessionEndpoint: true,
+    })
+
+    let loginFn: ((email: string, code: string) => Promise<unknown>) | null = null
+
+    function TestComponent() {
+      const { isAuthenticated, isLoading, login } = useAuth()
+      loginFn = login
+      return (
+        <div>
+          <span data-testid="loading">{String(isLoading)}</span>
+          <span data-testid="auth">{String(isAuthenticated)}</span>
+        </div>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').textContent).toBe('false')
+    })
+
+    calls.length = 0 // nullstill for å sjekke kun post-login kall
+
+    await act(async () => {
+      await loginFn!('ola@example.com', '123456')
+    })
+
+    expect(calls).toContain('/auth/session')
+    expect(calls).not.toContain('/auth/me')
+    expect(screen.getByTestId('auth').textContent).toBe('true')
+  })
+
   it('refreshUser henter brukerdata på nytt', async () => {
     let refreshCount = 0
     vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
