@@ -367,12 +367,28 @@ describe('request', () => {
     }
   })
 
-  it('propagerer nettverksfeil som TypeError', async () => {
+  it('konverterer nettverksfeil (fetch reject) til ApiError med status 0 og NetworkError', async () => {
+    mockFetch.mockRejectedValue(new TypeError('Failed to fetch'))
+
+    const client = createApiClient()
+
+    try {
+      await client.request('/test')
+      expect.fail('Skulle ha kastet ApiError')
+    } catch (e) {
+      expect(e).toBeInstanceOf(ApiError)
+      const err = e as ApiError
+      expect(err.status).toBe(0)
+      expect(err.statusText).toBe('NetworkError')
+    }
+  })
+
+  it('konverterer nettverksfeil i formDataRequest til ApiError', async () => {
     mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
 
     const client = createApiClient()
 
-    await expect(client.request('/test')).rejects.toThrow(TypeError)
+    await expect(client.formDataRequest('/upload', new FormData())).rejects.toBeInstanceOf(ApiError)
   })
 })
 
