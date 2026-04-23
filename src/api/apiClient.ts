@@ -192,12 +192,21 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
       body = JSON.stringify(options.body)
     }
 
-    const response = await fetch(`${basePath}${path}`, {
-      method,
-      headers,
-      body,
-      credentials: 'include',
-    })
+    let response: Response
+    try {
+      response = await fetch(`${basePath}${path}`, {
+        method,
+        headers,
+        body,
+        credentials: 'include',
+      })
+    } catch (err) {
+      throw new ApiError(
+        err instanceof TypeError ? 'Nettverksfeil — sjekk tilkoblingen' : String(err),
+        0,
+        'NetworkError'
+      )
+    }
 
     if (!response.ok) {
       return handleErrorResponse(response)
@@ -221,12 +230,21 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
     }
 
     // Ikke sett Content-Type — nettleseren setter multipart boundary selv
-    const response = await fetch(`${basePath}${path}`, {
-      method: upperMethod,
-      headers,
-      body: formData,
-      credentials: 'include',
-    })
+    let response: Response
+    try {
+      response = await fetch(`${basePath}${path}`, {
+        method: upperMethod,
+        headers,
+        body: formData,
+        credentials: 'include',
+      })
+    } catch (err) {
+      throw new ApiError(
+        err instanceof TypeError ? 'Nettverksfeil — sjekk tilkoblingen' : String(err),
+        0,
+        'NetworkError'
+      )
+    }
 
     if (!response.ok) {
       return handleErrorResponse(response)
