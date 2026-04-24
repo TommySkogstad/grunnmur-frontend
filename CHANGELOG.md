@@ -10,6 +10,16 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 - `authApi.getSession<TUser>()` — sesjonssjekk mot `/auth/session` (konfigurerbar via `sessionEndpoint`) som returnerer `{ authenticated, user? }`. Lar backend svare 2xx for anonyme brukere slik at nettleseren ikke logger 401 i konsollen (Lighthouse `errors-in-console`).
 - `AuthProviderConfig.useSessionEndpoint` — flagg som faar `AuthProvider` til aa bruke `getSession` i stedet for `getMe` ved initial sesjonssjekk. `getMe` beholdes uendret for bakoverkompatibilitet.
 
+### Oppdatert
+
+Dev-dependencies bumpet som del av koordinert frontend-dep-migrasjon (paraply #44):
+- `vitest` 3.x → 4.1.x (#51)
+- `jsdom` 26.x → 29.x (#51)
+- `eslint` 9.x → 10.2.x (#50)
+- `@eslint/js` 9.x → 10.x (#50)
+
+Alle 246 tester passerer, ingen kode-endring trengs. TypeScript 6 (#52) gjenstaar i eget sub-issue.
+
 ## [1.0.0] - 2026-04-08
 
 Forste stabile release av `@tommyskogstad/frontend-core`.
