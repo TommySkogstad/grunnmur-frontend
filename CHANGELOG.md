@@ -12,13 +12,14 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ### Oppdatert
 
-Dev-dependencies bumpet som del av koordinert frontend-dep-migrasjon (paraply #44):
+Dev-dependencies bumpet som del av koordinert frontend-dep-migrasjon (paraply #44, nå fullført):
+- `typescript` 5.7.x → 6.0.3 (#52)
 - `vitest` 3.x → 4.1.x (#51)
 - `jsdom` 26.x → 29.x (#51)
 - `eslint` 9.x → 10.2.x (#50)
 - `@eslint/js` 9.x → 10.x (#50)
 
-Alle 246 tester passerer, ingen kode-endring trengs. TypeScript 6 (#52) gjenstaar i eget sub-issue.
+Alle 246 tester passerer, ingen kode-endring trengs. Konsumentapper (biologportal, lo-finans, 6810, styreportal) bør bumpes tilsvarende når de neste gang `npm install`-er grunnmur — ellers kan IDE vise type-warnings på strengere TS 6-inferens.
 
 ## [1.0.0] - 2026-04-08
 
