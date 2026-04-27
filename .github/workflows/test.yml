@@ -15,14 +15,13 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, nuc]
     steps:
       - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: npm
 
       - run: npm ci
       - run: npm run build
