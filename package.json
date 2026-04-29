@@ -1,6 +1,6 @@
 {
   "name": "@tommyskogstad/frontend-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Felles frontend-bibliotek for Kotlin/Ktor-apper",
   "type": "module",
   "main": "dist/index.js",
