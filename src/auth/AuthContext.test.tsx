@@ -580,4 +580,53 @@ describe('createAuthProvider', () => {
 
     expect(screen.getByTestId('user').textContent).toBe('user-2@example.com')
   })
+
+  it('unmount under pågående fetchUser produserer ikke feil etter resolve', async () => {
+    let resolveMe: ((value: TestUser) => void) | undefined
+
+    vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
+      if (path === '/auth/me') {
+        return new Promise<TestUser>((resolve) => {
+          resolveMe = resolve
+        })
+      }
+      return undefined
+    })
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+    })
+
+    function TestComponent() {
+      const { isLoading } = useAuth()
+      return <span data-testid="loading">{String(isLoading)}</span>
+    }
+
+    const { unmount } = render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    expect(screen.getByTestId('loading').textContent).toBe('true')
+    expect(resolveMe).toBeDefined()
+
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    // Unmount FØR promisen resolver
+    unmount()
+
+    // Resolver promisen etter unmount — uten cancel-flag ville dette kalt
+    // setIsLoading(false) og setUser(parsed) på unmountet komponent,
+    // noe som i jsdom-teardown-kontekst trigger 'window is not defined'
+    await act(async () => {
+      resolveMe!(testUser)
+      await Promise.resolve()
+    })
+
+    const errors = errorSpy.mock.calls
+    expect(errors).toHaveLength(0)
+
+    errorSpy.mockRestore()
+  })
 })

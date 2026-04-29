@@ -25,7 +25,7 @@
  * ```
  */
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { ApiClient } from '../api/apiClient'
 import { ApiError } from '../api/apiClient'
@@ -97,11 +97,13 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
   function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<TUser | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const isMountedRef = useRef(true)
 
     const fetchUser = useCallback(async () => {
       try {
         if (useSessionEndpoint) {
           const session = await authApi.getSession<TUser>()
+          if (!isMountedRef.current) return
           if (!session.authenticated || session.user === undefined) {
             setUser(null)
             return
@@ -111,9 +113,11 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
           return
         }
         const data = await authApi.getMe<TUser>()
+        if (!isMountedRef.current) return
         const parsed = parseUser ? parseUser(data) : data
         setUser(parsed)
       } catch (error) {
+        if (!isMountedRef.current) return
         // 401 betyr at brukeren ikke er innlogget — det er forventet
         if (error instanceof ApiError && error.is(401)) {
           setUser(null)
@@ -142,9 +146,13 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
       onLogoutCallback?.()
     }, [])
 
-    // Sjekk sesjon ved mount
+    // Sjekk sesjon ved mount — cleanup hindrer state-oppdatering etter unmount
     useEffect(() => {
-      fetchUser().finally(() => setIsLoading(false))
+      isMountedRef.current = true
+      fetchUser().finally(() => {
+        if (isMountedRef.current) setIsLoading(false)
+      })
+      return () => { isMountedRef.current = false }
     }, [fetchUser])
 
     const value = useMemo<AuthContextValue<TUser>>(() => ({
