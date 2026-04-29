@@ -581,6 +581,48 @@ describe('createAuthProvider', () => {
     expect(screen.getByTestId('user').textContent).toBe('user-2@example.com')
   })
 
+  it('unmount under pågående fetchUser (reject) produserer ikke feil etter unmount', async () => {
+    let rejectMe: ((reason: Error) => void) | undefined
+
+    vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
+      if (path === '/auth/me') {
+        return new Promise<TestUser>((_, reject) => {
+          rejectMe = reject
+        })
+      }
+      return undefined
+    })
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+    })
+
+    function TestComponent() {
+      const { isLoading } = useAuth()
+      return <span data-testid="loading">{String(isLoading)}</span>
+    }
+
+    const { unmount } = render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    expect(rejectMe).toBeDefined()
+
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    unmount()
+
+    await act(async () => {
+      rejectMe!(new Error('nettverksfeil'))
+      await Promise.resolve()
+    })
+
+    expect(errorSpy.mock.calls).toHaveLength(0)
+    errorSpy.mockRestore()
+  })
+
   it('unmount under pågående fetchUser produserer ikke feil etter resolve', async () => {
     let resolveMe: ((value: TestUser) => void) | undefined
 

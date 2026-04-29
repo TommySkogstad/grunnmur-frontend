@@ -28,7 +28,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { ApiClient } from '../api/apiClient'
-import { ApiError } from '../api/apiClient'
 import { createAuthApi } from './authApi'
 import type { AuthApiConfig, LoginResponse } from './authApi'
 import { createProtectedRoute } from '../components/ProtectedRoute'
@@ -116,15 +115,9 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
         if (!isMountedRef.current) return
         const parsed = parseUser ? parseUser(data) : data
         setUser(parsed)
-      } catch (error) {
+      } catch {
         if (!isMountedRef.current) return
-        // 401 betyr at brukeren ikke er innlogget — det er forventet
-        if (error instanceof ApiError && error.is(401)) {
-          setUser(null)
-        } else {
-          // Andre feil (nettverksfeil etc.) — sett user til null
-          setUser(null)
-        }
+        setUser(null)
       }
     }, [])
 
