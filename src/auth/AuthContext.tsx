@@ -144,7 +144,7 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
       await authApi.logout()
       setUser(null)
       onLogoutCallback?.()
-    }, [])
+    }, [authApi, onLogoutCallback])
 
     // Sjekk sesjon ved mount — cleanup hindrer state-oppdatering etter unmount
     useEffect(() => {
