@@ -581,6 +581,42 @@ describe('createAuthProvider', () => {
     expect(screen.getByTestId('user').textContent).toBe('user-2@example.com')
   })
 
+  it('logout uten onLogout-callback kaster ikke feil og setter isAuthenticated=false', async () => {
+    vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
+      if (path === '/auth/me') return testUser
+      return undefined
+    })
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+      // onLogout ikke oppgitt — verifiserer at logout?.() håndteres korrekt
+    })
+
+    let logoutFn: (() => Promise<void>) | null = null
+
+    function TestComponent() {
+      const { isAuthenticated, logout } = useAuth()
+      logoutFn = logout
+      return <span data-testid="auth">{String(isAuthenticated)}</span>
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth').textContent).toBe('true')
+    })
+
+    await act(async () => {
+      await logoutFn!()
+    })
+
+    expect(screen.getByTestId('auth').textContent).toBe('false')
+  })
+
   it('unmount under pågående fetchUser produserer ikke feil etter resolve', async () => {
     let resolveMe: ((value: TestUser) => void) | undefined
 
