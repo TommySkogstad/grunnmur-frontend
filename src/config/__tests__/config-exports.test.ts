@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
+import { VERSION } from '../../index'
 
 const ROOT = resolve(__dirname, '..', '..', '..')
 
@@ -91,6 +92,13 @@ describe('Eksporterbar tsconfig.base.json', () => {
     expect(config.compilerOptions.rootDir).toBeUndefined()
     expect(config.compilerOptions.declaration).toBeUndefined()
     expect(config.compilerOptions.declarationDir).toBeUndefined()
+  })
+})
+
+describe('VERSION er synkronisert med package.json', () => {
+  it('VERSION matcher package.json-versjon', () => {
+    const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8'))
+    expect(VERSION).toBe(pkg.version)
   })
 })
 
