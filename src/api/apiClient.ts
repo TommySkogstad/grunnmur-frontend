@@ -30,6 +30,10 @@ export interface ApiClientConfig {
    * Har innebygd deduplisering — kalles maks én gang inntil resetUnauthorizedFlag().
    */
   onUnauthorized?: (error: ApiError) => void
+  /** Antall automatiske retries ved nettverksfeil eller 5xx (default: 0) */
+  retryCount?: number
+  /** Grunnforsinkelse mellom retries i ms — dobles eksponentielt (default: 500) */
+  retryDelay?: number
 }
 
 /** Alternativer for enkeltrequest */
@@ -78,6 +82,21 @@ export class ApiError extends Error {
 /** HTTP-metoder som IKKE er muterende og ikke trenger CSRF-token */
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function shouldRetryStatus(status: number): boolean {
+  return status >= 500 || status === 429
+}
+
+function getRetryAfterMs(response: Response): number | null {
+  const header = response.headers.get('Retry-After')
+  if (!header) return null
+  const seconds = parseInt(header, 10)
+  return isNaN(seconds) ? null : seconds * 1000
+}
+
 /**
  * Les en cookie-verdi fra document.cookie.
  * Bruker korrekt regex-mønster med decodeURIComponent.
@@ -102,6 +121,8 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
   const csrfCookieName = config?.csrfCookieName ?? 'csrf_token'
   const csrfHeaderName = config?.csrfHeaderName ?? 'X-CSRF-Token'
   const onUnauthorized = config?.onUnauthorized
+  const retryCount = config?.retryCount ?? 0
+  const retryDelayBase = config?.retryDelay ?? 500
 
   // In-memory CSRF-token (brukes kun i memory-mode)
   let memoryCsrfToken: string | null = null
@@ -176,6 +197,7 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
   async function request<T>(path: string, options?: RequestOptions): Promise<T> {
     const method = (options?.method ?? 'GET').toUpperCase()
     const headers: Record<string, string> = { ...options?.headers }
+    const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1
 
     // CSRF-token på muterende requests
     if (!SAFE_METHODS.has(method)) {
@@ -192,27 +214,42 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
       body = JSON.stringify(options.body)
     }
 
-    let response: Response
-    try {
-      response = await fetch(`${basePath}${path}`, {
-        method,
-        headers,
-        body,
-        credentials: 'include',
-      })
-    } catch (err) {
-      throw new ApiError(
-        err instanceof TypeError ? 'Nettverksfeil — sjekk tilkoblingen' : String(err),
-        0,
-        'NetworkError'
-      )
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      let response: Response
+      try {
+        response = await fetch(`${basePath}${path}`, {
+          method,
+          headers,
+          body,
+          credentials: 'include',
+        })
+      } catch (err) {
+        const networkError = new ApiError(
+          err instanceof TypeError ? 'Nettverksfeil — sjekk tilkoblingen' : String(err),
+          0,
+          'NetworkError'
+        )
+        if (attempt < maxAttempts - 1) {
+          await sleep(retryDelayBase * Math.pow(2, attempt))
+          continue
+        }
+        throw networkError
+      }
+
+      if (!response.ok) {
+        if (attempt < maxAttempts - 1 && shouldRetryStatus(response.status)) {
+          const delay = getRetryAfterMs(response) ?? retryDelayBase * Math.pow(2, attempt)
+          await sleep(delay)
+          continue
+        }
+        return handleErrorResponse(response)
+      }
+
+      return parseResponse<T>(response)
     }
 
-    if (!response.ok) {
-      return handleErrorResponse(response)
-    }
-
-    return parseResponse<T>(response)
+    // Nådd kun hvis maxAttempts er 0 (aldri i praksis siden minimum er 1)
+    throw new ApiError('Nettverksfeil — sjekk tilkoblingen', 0, 'NetworkError')
   }
 
   async function formDataRequest<T>(

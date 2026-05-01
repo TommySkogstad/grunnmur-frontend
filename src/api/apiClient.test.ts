@@ -440,7 +440,81 @@ describe('ApiError', () => {
 })
 
 // ============================================================
-// Test 7: formDataRequest
+// Test 7: retry-logikk
+// ============================================================
+describe('retry', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('GET retries 2x ved nettverksfeil og lykkes på 3. forsøk', async () => {
+    mockFetch
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(mockResponse({ ok: true }))
+
+    const client = createApiClient({ retryCount: 2, retryDelay: 0 })
+    const result = await client.request<{ ok: boolean }>('/test')
+
+    expect(result).toEqual({ ok: true })
+    expect(mockFetch).toHaveBeenCalledTimes(3)
+  })
+
+  it('POST retries ikke ved nettverksfeil', async () => {
+    mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+
+    const client = createApiClient({ retryCount: 2, retryDelay: 0 })
+
+    await expect(client.request('/test', { method: 'POST' })).rejects.toBeInstanceOf(ApiError)
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('GET retries ikke ved 404', async () => {
+    mockFetch.mockResolvedValueOnce(mockResponse({ error: 'Not found' }, 404, 'Not Found'))
+
+    const client = createApiClient({ retryCount: 2, retryDelay: 0 })
+
+    await expect(client.request('/test')).rejects.toBeInstanceOf(ApiError)
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('GET retries ved 503 uten Retry-After (eksponentielt backoff)', async () => {
+    mockFetch
+      .mockResolvedValueOnce(mockResponse({ error: 'Service Unavailable' }, 503, 'Service Unavailable'))
+      .mockResolvedValueOnce(mockResponse({ ok: true }))
+
+    const client = createApiClient({ retryCount: 1, retryDelay: 0 })
+    const result = await client.request<{ ok: boolean }>('/test')
+
+    expect(result).toEqual({ ok: true })
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('GET med 429 og Retry-After-header retries og lykkes', async () => {
+    vi.useFakeTimers()
+
+    const retryResponse = new Response('', {
+      status: 429,
+      statusText: 'Too Many Requests',
+      headers: { 'Retry-After': '1' },
+    })
+    mockFetch
+      .mockResolvedValueOnce(retryResponse)
+      .mockResolvedValueOnce(mockResponse({ ok: true }))
+
+    const client = createApiClient({ retryCount: 1, retryDelay: 500 })
+    const promise = client.request<{ ok: boolean }>('/test')
+
+    await vi.runAllTimersAsync()
+    const result = await promise
+
+    expect(result).toEqual({ ok: true })
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+})
+
+// ============================================================
+// Test 8: formDataRequest
 // ============================================================
 describe('formDataRequest', () => {
   it('sender FormData uten Content-Type header', async () => {
