@@ -92,6 +92,8 @@ const api = createApiClient({
   onUnauthorized: (error) => {  // Kalles ved 401 (med deduplisering)
     window.location.href = '/logg-inn'
   },
+  retryCount: 2,                // Antall retries ved nettverksfeil/5xx (default: 0)
+  retryDelay: 500,              // Base-forsinkelse i ms — dobles eksponentielt (default: 500)
 })
 ```
 
