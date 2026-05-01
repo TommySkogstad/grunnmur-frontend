@@ -360,6 +360,18 @@ Alle funksjoner returnerer tankestrek (`–`) for ugyldig input.
 
 ---
 
+### `VERSION`
+
+Pakkeversjon synkronisert med `package.json`.
+
+```ts
+import { VERSION } from '@tommyskogstad/frontend-core'
+
+console.log(VERSION) // e.g. "1.2.3"
+```
+
+---
+
 ### Delt konfigurasjon
 
 Pakken eksporterer ogsa ESLint-config og base tsconfig for konsistent oppsett pa tvers av apper.
