@@ -5,7 +5,8 @@
  * @see README.md for API-referanse og konfigurasjon
  */
 
-export const VERSION = '1.0.0'
+import pkg from '../package.json'
+export const VERSION = pkg.version
 
 // API-klient
 export { createApiClient, ApiError } from './api/apiClient'
