@@ -5,7 +5,9 @@ import {
   formatDateTime,
   formatNumber,
   formatFileSize,
-  relativeTime
+  relativeTime,
+  NUMBER_FMT_CACHE_MAX,
+  _numberFmtCacheSize
 } from '../formatters'
 
 describe('formatCurrency', () => {
@@ -92,6 +94,23 @@ describe('formatNumber', () => {
 
   it('returnerer tankestrek for NaN', () => {
     expect(formatNumber(NaN)).toBe('\u2013')
+  })
+
+  it('numberFmtCache vokser ikke over NUMBER_FMT_CACHE_MAX', () => {
+    // Kaller med NUMBER_FMT_CACHE_MAX + 5 unike desimalverdier
+    for (let d = 0; d < NUMBER_FMT_CACHE_MAX + 5; d++) {
+      formatNumber(1.23456789, d)
+    }
+    expect(_numberFmtCacheSize()).toBeLessThanOrEqual(NUMBER_FMT_CACHE_MAX)
+  })
+
+  it('formaterer korrekt etter FIFO-eviction', () => {
+    // Fyller cachen og verifiserer at output er korrekt for en evicted entry
+    for (let d = 0; d < NUMBER_FMT_CACHE_MAX + 5; d++) {
+      formatNumber(1.23456789, d)
+    }
+    // decimals=2 kan ha blitt evictet \u2014 ny instans skal bygges korrekt
+    expect(formatNumber(1234.5, 2)).toMatch(/1\s?234,50/)
   })
 })
 
