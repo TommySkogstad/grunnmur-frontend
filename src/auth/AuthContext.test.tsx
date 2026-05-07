@@ -617,6 +617,109 @@ describe('createAuthProvider', () => {
     expect(screen.getByTestId('auth').textContent).toBe('false')
   })
 
+  it('onSessionError kalles ved nettverksfeil under initial mount', async () => {
+    const networkError = new Error('Network failure')
+    vi.mocked(mockClient.request).mockRejectedValue(networkError)
+
+    const onSessionError = vi.fn()
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+      onSessionError,
+    })
+
+    function TestComponent() {
+      const { isAuthenticated, isLoading } = useAuth()
+      return (
+        <div>
+          <span data-testid="loading">{String(isLoading)}</span>
+          <span data-testid="auth">{String(isAuthenticated)}</span>
+        </div>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').textContent).toBe('false')
+    })
+
+    expect(screen.getByTestId('auth').textContent).toBe('false')
+    expect(onSessionError).toHaveBeenCalledOnce()
+    expect(onSessionError).toHaveBeenCalledWith(networkError)
+  })
+
+  it('onSessionError kalles ikke ved 401 (forventet uautentisert tilstand)', async () => {
+    vi.mocked(mockClient.request).mockRejectedValue(
+      new ApiError('Unauthorized', 401, 'Unauthorized')
+    )
+
+    const onSessionError = vi.fn()
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+      onSessionError,
+    })
+
+    function TestComponent() {
+      const { isAuthenticated, isLoading } = useAuth()
+      return (
+        <div>
+          <span data-testid="loading">{String(isLoading)}</span>
+          <span data-testid="auth">{String(isAuthenticated)}</span>
+        </div>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').textContent).toBe('false')
+    })
+
+    expect(screen.getByTestId('auth').textContent).toBe('false')
+    expect(onSessionError).not.toHaveBeenCalled()
+  })
+
+  it('uten onSessionError: nettverksfeil kaster ikke feil og setter isAuthenticated=false', async () => {
+    vi.mocked(mockClient.request).mockRejectedValue(new Error('Network failure'))
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+      // onSessionError ikke oppgitt
+    })
+
+    function TestComponent() {
+      const { isAuthenticated, isLoading } = useAuth()
+      return (
+        <div>
+          <span data-testid="loading">{String(isLoading)}</span>
+          <span data-testid="auth">{String(isAuthenticated)}</span>
+        </div>
+      )
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading').textContent).toBe('false')
+    })
+
+    expect(screen.getByTestId('auth').textContent).toBe('false')
+  })
+
   it('unmount under pågående fetchUser produserer ikke feil etter resolve', async () => {
     let resolveMe: ((value: TestUser) => void) | undefined
 

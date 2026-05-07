@@ -60,6 +60,8 @@ export interface AuthProviderConfig<TUser> extends AuthApiConfig {
   onLogout?: () => void
   /** Custom parsing av brukerdata fra /me- eller /session-endepunktet */
   parseUser?: (data: unknown) => TUser
+  /** Kalles ved uventet feil under sessjonssjekk (ikke 401) */
+  onSessionError?: (error: unknown) => void
   /**
    * Bruk session-endepunkt (2xx for både anonyme og autentiserte) i stedet for
    * /me (som returnerer 401 for anonyme og logger nettverksfeil i konsollen).
@@ -84,6 +86,7 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
   const {
     apiClient,
     onLogout: onLogoutCallback,
+    onSessionError,
     parseUser,
     useSessionEndpoint,
     ...authApiConfig
@@ -122,8 +125,8 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
         if (error instanceof ApiError && error.is(401)) {
           setUser(null)
         } else {
-          // Andre feil (nettverksfeil etc.) — sett user til null
           setUser(null)
+          onSessionError?.(error)
         }
       }
     }, [])
