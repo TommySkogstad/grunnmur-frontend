@@ -1,16 +1,27 @@
 /**
  * Norske formatters for dato, valuta, tall, filstørrelse og relativ tid.
  * Bruker nb-NO locale via Intl API-er.
+ *
+ * FORUTSETNING: Dette modulet er designet for et single-locale browser-miljø
+ * (nb-NO). Formatter-instansene caches modul-globalt for ytelse og deles
+ * på tvers av alle kall i samme modulinstans. Ikke egnet for SSR med
+ * per-request locale uten refaktor til factory-funksjoner.
+ *
+ * Testing: Hvis du trenger fersk formatter-state (f.eks. ved vi.stubGlobal('Intl'...)),
+ * bruk vi.resetModules() + dynamisk import for å isolere modulen per test.
  */
 
 const LOCALE = 'nb-NO'
-const DASH = '\u2013' // tankestrek (–)
+const DASH = '–' // tankestrek (–)
 
 // Lazy-initialiserte Intl-formatters for ytelse
 let currencyFmt: Intl.NumberFormat
 let dateFmt: Intl.DateTimeFormat
 let dateTimeFmt: Intl.DateTimeFormat
 let relativeFmt: Intl.RelativeTimeFormat
+
+/** Maks antall entries i numberFmtCache — FIFO-purge ved overskridelse */
+export const NUMBER_FMT_CACHE_MAX = 10
 
 /** Konverterer string | Date til Date, eller null ved ugyldig input */
 function toDate(input: string | Date): Date | null {
@@ -48,6 +59,11 @@ export function formatDateTime(date: string | Date): string {
 // Cache for formatNumber med ulike desimalverdier
 const numberFmtCache = new Map<number | undefined, Intl.NumberFormat>()
 
+/** Eksponerer cache-størrelse for testing — ikke bruk i produksjonskode */
+export function _numberFmtCacheSize(): number {
+  return numberFmtCache.size
+}
+
 /** Formaterer tall med norsk tusenskilletegn og valgfritt antall desimaler */
 export function formatNumber(num: number, decimals?: number): string {
   if (!isFinite(num)) return DASH
@@ -57,6 +73,11 @@ export function formatNumber(num: number, decimals?: number): string {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals
     })
+    // FIFO-purge: Map bevarer insertion-order, så .keys().next() gir eldste nøkkel.
+    // undefined er en gyldig nøkkel (decimals er optional) — delete(undefined) er trygt.
+    if (numberFmtCache.size >= NUMBER_FMT_CACHE_MAX) {
+      numberFmtCache.delete(numberFmtCache.keys().next().value)
+    }
     numberFmtCache.set(decimals, fmt)
   }
   return fmt.format(num)
