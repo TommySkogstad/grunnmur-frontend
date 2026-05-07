@@ -517,6 +517,39 @@ describe('retry', () => {
 // Test 8: formDataRequest
 // ============================================================
 describe('formDataRequest', () => {
+  it('retries ved 503 og lykkes på andre forsøk', async () => {
+    mockFetch
+      .mockResolvedValueOnce(mockResponse({ error: 'Service Unavailable' }, 503, 'Service Unavailable'))
+      .mockResolvedValueOnce(mockResponse({ uploaded: true }))
+
+    const client = createApiClient({ retryCount: 1, retryDelay: 0 })
+    const result = await client.formDataRequest<{ uploaded: boolean }>('/upload', new FormData())
+
+    expect(result).toEqual({ uploaded: true })
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('retries ved nettverksfeil og lykkes på andre forsøk', async () => {
+    mockFetch
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(mockResponse({ uploaded: true }))
+
+    const client = createApiClient({ retryCount: 1, retryDelay: 0 })
+    const result = await client.formDataRequest<{ uploaded: boolean }>('/upload', new FormData())
+
+    expect(result).toEqual({ uploaded: true })
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('gjør ikke retry med retryCount: 0 (default)', async () => {
+    mockFetch.mockResolvedValueOnce(mockResponse({ error: 'Service Unavailable' }, 503, 'Service Unavailable'))
+
+    const client = createApiClient({ retryDelay: 0 })
+
+    await expect(client.formDataRequest('/upload', new FormData())).rejects.toBeInstanceOf(ApiError)
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+
   it('sender FormData uten Content-Type header', async () => {
     mockFetch.mockResolvedValueOnce(mockResponse({ uploaded: true }))
 
