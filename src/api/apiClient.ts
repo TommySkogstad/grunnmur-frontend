@@ -194,35 +194,14 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
     }
   }
 
-  async function request<T>(path: string, options?: RequestOptions): Promise<T> {
-    const method = (options?.method ?? 'GET').toUpperCase()
-    const headers: Record<string, string> = { ...options?.headers }
-    const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1
-
-    // CSRF-token på muterende requests
-    if (!SAFE_METHODS.has(method)) {
-      const token = getCsrfToken()
-      if (token) {
-        headers[csrfHeaderName] = token
-      }
-    }
-
-    // Content-Type og body-serialisering
-    let body: string | undefined
-    if (options?.body !== undefined) {
-      headers['Content-Type'] = 'application/json'
-      body = JSON.stringify(options.body)
-    }
-
+  async function fetchWithRetry<T>(
+    fn: () => Promise<Response>,
+    maxAttempts: number
+  ): Promise<T> {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       let response: Response
       try {
-        response = await fetch(`${basePath}${path}`, {
-          method,
-          headers,
-          body,
-          credentials: 'include',
-        })
+        response = await fn()
       } catch (err) {
         const networkError = new ApiError(
           err instanceof TypeError ? 'Nettverksfeil — sjekk tilkoblingen' : String(err),
@@ -252,6 +231,32 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
     throw new ApiError('Nettverksfeil — sjekk tilkoblingen', 0, 'NetworkError')
   }
 
+  async function request<T>(path: string, options?: RequestOptions): Promise<T> {
+    const method = (options?.method ?? 'GET').toUpperCase()
+    const headers: Record<string, string> = { ...options?.headers }
+    const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1
+
+    // CSRF-token på muterende requests
+    if (!SAFE_METHODS.has(method)) {
+      const token = getCsrfToken()
+      if (token) {
+        headers[csrfHeaderName] = token
+      }
+    }
+
+    // Content-Type og body-serialisering
+    let body: string | undefined
+    if (options?.body !== undefined) {
+      headers['Content-Type'] = 'application/json'
+      body = JSON.stringify(options.body)
+    }
+
+    return fetchWithRetry<T>(
+      () => fetch(`${basePath}${path}`, { method, headers, body, credentials: 'include' }),
+      maxAttempts
+    )
+  }
+
   async function formDataRequest<T>(
     path: string,
     formData: FormData,
@@ -267,27 +272,16 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
     }
 
     // Ikke sett Content-Type — nettleseren setter multipart boundary selv
-    let response: Response
-    try {
-      response = await fetch(`${basePath}${path}`, {
+    // Retry alltid basert på retryCount: filopplastninger er sårbare for transiente nettverksfeil
+    return fetchWithRetry<T>(
+      () => fetch(`${basePath}${path}`, {
         method: upperMethod,
         headers,
         body: formData,
         credentials: 'include',
-      })
-    } catch (err) {
-      throw new ApiError(
-        err instanceof TypeError ? 'Nettverksfeil — sjekk tilkoblingen' : String(err),
-        0,
-        'NetworkError'
-      )
-    }
-
-    if (!response.ok) {
-      return handleErrorResponse(response)
-    }
-
-    return parseResponse<T>(response)
+      }),
+      1 + retryCount
+    )
   }
 
   return {
