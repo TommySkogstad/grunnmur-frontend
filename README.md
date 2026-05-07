@@ -92,8 +92,8 @@ const api = createApiClient({
   onUnauthorized: (error) => {  // Kalles ved 401 (med deduplisering)
     window.location.href = '/logg-inn'
   },
-  retryCount: 2,                // Antall retries ved nettverksfeil/5xx (default: 0)
-  retryDelay: 500,              // Base-forsinkelse i ms — dobles eksponentielt (default: 500)
+  retryCount: 2,                // Antall retries ved nettverksfeil/5xx — gjelder baade request() og formDataRequest() (default: 0)
+  retryDelay: 500,              // Grunnforsinkelse i ms — dobles eksponentielt (default: 500)
 })
 ```
 
@@ -101,8 +101,8 @@ const api = createApiClient({
 
 | Metode | Beskrivelse |
 |--------|-------------|
-| `request<T>(path, options?)` | JSON-request med automatisk CSRF |
-| `formDataRequest<T>(path, formData, method?)` | FormData-request for filopplasting |
+| `request<T>(path, options?)` | JSON-request med automatisk CSRF og retry-logikk |
+| `formDataRequest<T>(path, formData, method?)` | FormData-request for filopplasting med retry-logikk |
 | `getCsrfToken()` | Hent gjeldende CSRF-token |
 | `setCsrfToken(token)` | Sett CSRF-token manuelt (memory-mode) |
 | `resetUnauthorizedFlag()` | Resett 401-deduplisering etter re-autentisering |

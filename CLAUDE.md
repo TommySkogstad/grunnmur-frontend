@@ -41,8 +41,8 @@ npm run lint      # ESLint
 - `onUnauthorized`: callback for 401-håndtering
 - `csrfSource`: `'cookie'` | `'memory'`
 - `basePath`: default `/api`
-- `retryCount`: antall retries ved transiente feil (default: 0)
-- `retryDelay`: base-forsinkelse i ms — dobles eksponentielt (default: 500)
+- `retryCount`: antall automatiske retries ved nettverksfeil eller 5xx — gjelder både `request()` og `formDataRequest()` (default: 0)
+- `retryDelay`: grunnforsinkelse mellom retries i ms — dobles eksponentielt (default: 500)
 
 ### AuthContext
 - Generisk User-type: `AuthProvider<TUser>`
