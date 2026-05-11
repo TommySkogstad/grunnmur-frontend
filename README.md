@@ -158,6 +158,9 @@ const { AuthProvider, useAuth, ProtectedRoute } = createAuthProvider<MyUser>({
   apiClient: api,                         // API-klient fra createApiClient()
   loginPath: '/logg-inn',                 // Sti til innloggingsside (default: '/login')
   onLogout: () => queryClient.clear(),    // Callback ved utlogging
+  onSessionError: (error) => {            // Callback for uventede sesjonsfeil (network/5xx)
+    logErrorToServer(error)               // Kalles når sessjonssjekk feiler (ikke 401)
+  },
   parseUser: (data) => data as MyUser,    // Custom parsing av /me-respons
   // Unngå 401-logging i konsollen (krever at backend returnerer 2xx på /auth/session):
   useSessionEndpoint: true,               // Bruk session-endepunkt i stedet for /me
@@ -176,6 +179,11 @@ Backend må da returnere 2xx med `{ authenticated: boolean, user?: TUser }`
 slik at nettleseren ikke logger 401-nettverksfeil i konsollen for anonyme
 brukere (Lighthouse `errors-in-console`). `getMe` beholdes uendret for
 bakoverkompatibilitet.
+
+**`onSessionError`** — valgfri callback som kalles når sessjonssjekk feiler med
+en *uventet* feil (nettverksfeil, 5xx osv.). Kalles IKKE på 401 (som er forventet
+og betyr at brukeren ikke er innlogget). Brukes til å loggføre eller håndtere
+feil som bør få oppmerksomhet:
 
 ```ts
 // Autentisert respons
@@ -359,6 +367,8 @@ import {
 | `relativeTime(date)` | `new Date(Date.now() - 7200000)` | `2 timer siden` |
 
 Alle funksjoner returnerer tankestrek (`–`) for ugyldig input.
+
+**Viktig:** Modulen cacher Intl-instanser modul-globalt for ytelse og er designet for single-locale browser-miljøer (`nb-NO`). For SSR med per-request locale kreves refaktor til factory-funksjoner. Ved testing med stubbed `Intl` bruker du `vi.resetModules()` + dynamisk import for å isolere modulen per test.
 
 ---
 

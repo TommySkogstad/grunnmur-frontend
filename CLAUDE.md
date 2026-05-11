@@ -48,6 +48,7 @@ npm run lint      # ESLint
 - Generisk User-type: `AuthProvider<TUser>`
 - `loginPath`: f.eks. `/logg-inn`
 - `onLogout`: callback
+- `onSessionError`: callback for uventede sesjonsfeil (network/5xx, ikke 401)
 
 ### ProtectedRoute
 - `loginPath`: konfigurerbar
