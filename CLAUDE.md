@@ -49,6 +49,8 @@ npm run lint      # ESLint
 - `loginPath`: f.eks. `/logg-inn`
 - `onLogout`: callback
 - `onSessionError`: callback for uventede sesjonsfeil (network/5xx, ikke 401)
+- `useSessionEndpoint`: flagg — bruk `/auth/session` i stedet for `/me` ved initial sjekk
+- `sessionEndpoint`: konfigurerbar URL for session-endepunkt (default `/auth/session`)
 
 ### ProtectedRoute
 - `loginPath`: konfigurerbar
