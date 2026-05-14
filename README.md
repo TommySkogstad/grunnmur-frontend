@@ -384,6 +384,85 @@ console.log(VERSION) // e.g. "1.2.3"
 
 ---
 
+### `AnalyticsProvider`
+
+Laster Umami analytics-skriptet og tilgjengeliggjør tracking via React Context.
+
+```tsx
+import { AnalyticsProvider, useAnalytics, TrackClick, usePageView } from '@tommyskogstad/frontend-core'
+
+<AnalyticsProvider websiteId="abc123" scriptSrc="https://analytics.example.com/script.js">
+  <App />
+</AnalyticsProvider>
+```
+
+| Prop | Type | Beskrivelse |
+|------|------|-------------|
+| `websiteId` | `string` | Umami website ID |
+| `scriptSrc` | `string` | URL til Umami-skriptet (må være HTTPS) |
+| `children` | `ReactNode` | React-barn |
+
+**Oppførsel:**
+- Hopper over innlasting i dev-modus (`import.meta.env.DEV`)
+- Hopper over hvis bruker har satt `localStorage.umami.disabled = '1'` (opt-out)
+- Varsler i konsollen hvis scriptSrc ikke bruker HTTPS
+
+---
+
+### `useAnalytics()`
+
+Hook for manuell event-sporing.
+
+```ts
+const { trackEvent } = useAnalytics()
+
+trackEvent('button.click', { page: 'home' })
+trackEvent('purchase', { amount: 1234 })
+```
+
+Returnerer `{ trackEvent: (name: string, data?: Record<string, unknown>) => void }`. Er no-op dersom tracking er deaktivert.
+
+---
+
+### `TrackClick`
+
+Deklarativ wrapper som sporer klikk på barnelementet.
+
+```tsx
+import { TrackClick } from '@tommyskogstad/frontend-core'
+
+<TrackClick event="cta.signup" data={{ variant: 'primary' }}>
+  <Button>Registrer deg</Button>
+</TrackClick>
+```
+
+| Prop | Type | Beskrivelse |
+|------|------|-------------|
+| `event` | `string` | Navn på eventet som spores |
+| `data` | `Record<string, unknown>` | Valgfrie event-data |
+| `children` | `ReactNode` | Barneelement med onClick-handler |
+
+Injiserer `trackEvent` i barnelementets `onClick` uten å overskrive eksisterende handler.
+
+---
+
+### `usePageView()`
+
+Hook for SPA-sidevisnings-sporing med React Router.
+
+```tsx
+import { usePageView } from '@tommyskogstad/frontend-core'
+
+function App() {
+  usePageView()
+  return <Routes>...</Routes>
+}
+```
+
+Kaller `window.umami.track({ url: location.pathname })` ved hver pathname-endring. Krever at komponenten er innenfor en `react-router-dom` Router. Er no-op dersom tracking er deaktivert.
+
+---
+
 ### Delt konfigurasjon
 
 Pakken eksporterer ogsa ESLint-config og base tsconfig for konsistent oppsett pa tvers av apper.
