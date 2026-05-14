@@ -147,7 +147,7 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
       await authApi.logout()
       setUser(null)
       onLogoutCallback?.()
-    }, [authApi, onLogoutCallback])
+    }, []) // authApi og onLogoutCallback er factory-scope konstanter, ikke React-tilstand
 
     // Sjekk sesjon ved mount — cleanup hindrer state-oppdatering etter unmount
     useEffect(() => {
