@@ -83,11 +83,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       } else if (fallback !== undefined) {
         content = fallback
       } else {
-        // Standard fallback-melding
         content = (
           <>
             <p>Noe gikk galt</p>
-            <p>Last inn siden på nytt</p>
+            <button type="button" onClick={this.reset}>Last inn på nytt</button>
           </>
         )
       }
