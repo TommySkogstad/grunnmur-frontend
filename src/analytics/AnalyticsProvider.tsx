@@ -66,6 +66,10 @@ export function AnalyticsProvider({ websiteId, scriptSrc, children }: AnalyticsP
   useEffect(() => {
     if (!isEnabled) return
 
+    if (!scriptSrc.startsWith('https://')) {
+      console.warn('[Analytics] scriptSrc bør bruke https://', scriptSrc)
+    }
+
     const script = document.createElement('script')
     script.async = true
     script.defer = true
