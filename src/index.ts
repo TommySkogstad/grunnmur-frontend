@@ -36,3 +36,11 @@ export {
   formatFileSize,
   relativeTime
 } from './lib/formatters'
+
+// Analytics
+export { AnalyticsProvider } from './analytics/AnalyticsProvider'
+export type { AnalyticsProviderProps } from './analytics/AnalyticsProvider'
+export { useAnalytics } from './analytics/useAnalytics'
+export { TrackClick } from './analytics/TrackClick'
+export type { TrackClickProps } from './analytics/TrackClick'
+export { usePageView } from './analytics/usePageView'
