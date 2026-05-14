@@ -73,14 +73,27 @@ describe('ErrorBoundary', () => {
     expect(onError.mock.calls[0][1]).toHaveProperty('componentStack')
   })
 
-  it('bruker standard fallback-melding uten fallback-prop', () => {
+  it('standard fallback viser reset-knapp som nullstiller feilen', async () => {
+    const { fireEvent } = await import('@testing-library/react')
+    let shouldThrow = true
+
+    function ConditionalThrow() {
+      if (shouldThrow) throw new Error('Uventet feil')
+      return <p>Gjenopprettet</p>
+    }
+
     render(
       <ErrorBoundary>
-        <ThrowingComponent error={new Error('Uventet feil')} />
+        <ConditionalThrow />
       </ErrorBoundary>
     )
+
     expect(screen.getByText('Noe gikk galt')).toBeDefined()
-    expect(screen.getByText('Last inn siden på nytt')).toBeDefined()
+    const resetBtn = screen.getByRole('button', { name: 'Last inn på nytt' })
+    expect(resetBtn).toBeDefined()
+    shouldThrow = false
+    fireEvent.click(resetBtn)
+    expect(screen.getByText('Gjenopprettet')).toBeDefined()
   })
 
   it('setter className på wrapper-elementet', () => {
