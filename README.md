@@ -257,7 +257,7 @@ Styling-agnostisk error boundary som fanger ubehandlede feil i React-komponenttr
 import { ErrorBoundary } from '@tommyskogstad/frontend-core'
 import type { ErrorBoundaryProps } from '@tommyskogstad/frontend-core'
 
-// Standard fallback (viser "Noe gikk galt")
+// Standard fallback (viser "Noe gikk galt" med reset-knapp)
 <ErrorBoundary>
   <App />
 </ErrorBoundary>
