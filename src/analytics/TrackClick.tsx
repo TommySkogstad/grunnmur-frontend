@@ -22,10 +22,7 @@ export interface TrackClickProps {
   children: ReactNode
 }
 
-type ClickableProps = {
-  onClick?: (e: MouseEvent) => void
-  [key: string]: unknown
-}
+type ClickableElement = ReactElement<{ onClick?: (e: MouseEvent) => void }>
 
 /**
  * Injiserer trackEvent i barnelementets onClick-handler.
@@ -36,7 +33,7 @@ export function TrackClick({ event, data, children }: TrackClickProps) {
 
   if (!isValidElement(children)) return <>{children}</>
 
-  const child = children as ReactElement<ClickableProps>
+  const child = children as ClickableElement
   const originalOnClick = child.props.onClick
 
   return cloneElement(child, {
@@ -44,5 +41,5 @@ export function TrackClick({ event, data, children }: TrackClickProps) {
       trackEvent(event, data)
       originalOnClick?.(e)
     },
-  } as Partial<ClickableProps>)
+  })
 }
