@@ -2,8 +2,8 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, act, cleanup } from '@testing-library/react'
-import { useAnalytics } from './useAnalytics'
+import { render, act, cleanup, waitFor } from '@testing-library/react'
+import { useAnalytics, hashUserId } from './useAnalytics'
 import { AnalyticsProvider } from './AnalyticsProvider'
 
 function TestComponent({ onTrack }: { onTrack: (name: string) => void }) {
@@ -102,5 +102,150 @@ describe('useAnalytics', () => {
     })
 
     expect(mockTrack).not.toHaveBeenCalled()
+  })
+
+  describe('hashUserId', () => {
+    it('genererer 16-tegns hex-pseudonym', async () => {
+      const hash = await hashUserId('user-123', 'app.example.com')
+      expect(hash).toMatch(/^[0-9a-f]{16}$/)
+    })
+
+    it('samme input gir samme hash', async () => {
+      const h1 = await hashUserId('user-123', 'app.example.com')
+      const h2 = await hashUserId('user-123', 'app.example.com')
+      expect(h1).toBe(h2)
+    })
+
+    it('forskjellig salt gir forskjellig hash (cross-app-isolasjon)', async () => {
+      const a = await hashUserId('user-123', 'app-a.example.com')
+      const b = await hashUserId('user-123', 'app-b.example.com')
+      expect(a).not.toBe(b)
+    })
+  })
+
+  describe('identify', () => {
+    function IdentifyComponent({
+      userId,
+      attrs,
+    }: {
+      userId: string | number | null
+      attrs?: Record<string, unknown>
+    }) {
+      const { identify } = useAnalytics()
+      return (
+        <button onClick={() => identify(userId, attrs)}>identify</button>
+      )
+    }
+
+    it('kaller window.umami.identify med hashet id + attrs', async () => {
+      vi.stubEnv('DEV', false)
+      const mockIdentify = vi.fn()
+      ;(window as Window & { umami?: { track: () => void; identify: typeof mockIdentify } }).umami = {
+        track: vi.fn(),
+        identify: mockIdentify,
+      }
+
+      const { getByText } = render(
+        <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+          <IdentifyComponent userId={42} attrs={{ rolle: 'ADMIN', tenant: 't1' }} />
+        </AnalyticsProvider>
+      )
+
+      await act(async () => {
+        getByText('identify').click()
+      })
+
+      await waitFor(() => expect(mockIdentify).toHaveBeenCalledOnce())
+      const [id, attrs] = mockIdentify.mock.calls[0]
+      expect(id).toMatch(/^[0-9a-f]{16}$/)
+      expect(attrs).toEqual({ rolle: 'ADMIN', tenant: 't1' })
+    })
+
+    it('userId=null kaller identify({}) for å rydde session', async () => {
+      vi.stubEnv('DEV', false)
+      const mockIdentify = vi.fn()
+      ;(window as Window & { umami?: { track: () => void; identify: typeof mockIdentify } }).umami = {
+        track: vi.fn(),
+        identify: mockIdentify,
+      }
+
+      const { getByText } = render(
+        <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+          <IdentifyComponent userId={null} />
+        </AnalyticsProvider>
+      )
+
+      await act(async () => {
+        getByText('identify').click()
+      })
+
+      expect(mockIdentify).toHaveBeenCalledWith({})
+    })
+
+    it('er no-op i dev-modus', async () => {
+      vi.stubEnv('DEV', true)
+      const mockIdentify = vi.fn()
+      ;(window as Window & { umami?: { track: () => void; identify: typeof mockIdentify } }).umami = {
+        track: vi.fn(),
+        identify: mockIdentify,
+      }
+
+      const { getByText } = render(
+        <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+          <IdentifyComponent userId={1} />
+        </AnalyticsProvider>
+      )
+
+      await act(async () => {
+        getByText('identify').click()
+      })
+
+      expect(mockIdentify).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('reset', () => {
+    function ResetComponent() {
+      const { reset } = useAnalytics()
+      return <button onClick={() => reset()}>reset</button>
+    }
+
+    it('kaller window.umami.identify({}) for å rydde session', async () => {
+      vi.stubEnv('DEV', false)
+      const mockIdentify = vi.fn()
+      ;(window as Window & { umami?: { track: () => void; identify: typeof mockIdentify } }).umami = {
+        track: vi.fn(),
+        identify: mockIdentify,
+      }
+
+      const { getByText } = render(
+        <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+          <ResetComponent />
+        </AnalyticsProvider>
+      )
+
+      await act(async () => {
+        getByText('reset').click()
+      })
+
+      expect(mockIdentify).toHaveBeenCalledWith({})
+    })
+
+    it('er no-op når isEnabled=false (utenfor provider)', async () => {
+      vi.stubEnv('DEV', false)
+      const mockIdentify = vi.fn()
+      ;(window as Window & { umami?: { track: () => void; identify: typeof mockIdentify } }).umami = {
+        track: vi.fn(),
+        identify: mockIdentify,
+      }
+
+      const { getByText } = render(<ResetComponent />)
+
+      await act(async () => {
+        getByText('reset').click()
+      })
+
+      expect(mockIdentify).not.toHaveBeenCalled()
+    })
   })
 })
