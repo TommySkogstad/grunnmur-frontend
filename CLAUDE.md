@@ -68,7 +68,6 @@ npm run lint      # ESLint
 | summa-summarum | Pilot. Enklest app |
 | 6810 | In-memory CSRF |
 | styreportal | Multi-tenant (TenantContext) |
-| lo-finans | Objekt-stil API (api.get/api.post) |
 | biologportal | React Query, TOTP, Observer-rolle |
 
 ## Konvensjoner
@@ -91,7 +90,7 @@ node_modules/react-router-dom
 node_modules/.package-lock.json
 ```
 
-**Hvorfor:** Konsumentapper (lo-finans, biologportal, 6810, styreportal) bruker
+**Hvorfor:** Konsumentapper (biologportal, 6810, styreportal, smart-casual) bruker
 oss via `file:../../grunnmur-frontend` og kopierer hele denne mappa inn i
 Docker build-konteksten via `additional_contexts` + `COPY --from=grunnmur-frontend`.
 Hvis vår `node_modules/react` følger med, ender konsumenten opp med to
@@ -110,6 +109,7 @@ Se issue #26 og biologportal-incidenten 2026-04-10.
 React-incidenten (runde 1) traff biologportal og lo-finans 2026-04-10 — fire
 påfølgende deploys i biologportal feilet smoke-test [7/7] før rotårsaken ble
 identifisert. Se PR #24 og hvit side-incident i memory for full historikk.
+(lo-finans arkivert 2026-05-19.)
 
 **Hva som fortsatt shippes:** `@types/react`, `@types/react-dom`,
 `@tanstack/react-query` og resten av `node_modules/`.

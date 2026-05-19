@@ -557,10 +557,11 @@ const { AuthProvider, useAuth, ProtectedRoute } = createAuthProvider<TenantUser>
 </Route>
 ```
 
-### lo-finans (objekt-stil API)
+### Objekt-stil API (api.get/api.post)
 
 ```ts
-// lo-finans bruker api.get/api.post-stil — wrapp apiClient:
+// Hvis appen bruker api.get/api.post-stil i stedet for apiClient.request direkte,
+// wrapp apiClient slik:
 const apiClient = createApiClient({ ... })
 
 const api = {
