@@ -6,6 +6,13 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-05-20
+
+### Lagt til
+- `useAnalytics()` returnerer nå `{ trackEvent, identify, reset }` — de to nye funksjonene ble implementert i commit `538e235` (2026-05-18) men manglet i dokumentasjonen.
+  - `identify(userId, attrs?)` — kobler Umami-sesjon til pseudonymisert bruker-ID (hashes lokalt via SHA-256 med per-app salt)
+  - `reset()` — tøm session-identifisering ved logout (viktig på delte maskiner)
+
 ## [1.0.1] - 2026-05-13
 
 ### Lagt til
