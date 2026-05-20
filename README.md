@@ -411,16 +411,27 @@ import { AnalyticsProvider, useAnalytics, TrackClick, usePageView } from '@tommy
 
 ### `useAnalytics()`
 
-Hook for manuell event-sporing.
+Hook for manuell event-sporing og session-identifisering.
 
 ```ts
-const { trackEvent } = useAnalytics()
+const { trackEvent, identify, reset } = useAnalytics()
 
+// Event-sporing:
 trackEvent('button.click', { page: 'home' })
 trackEvent('purchase', { amount: 1234 })
+
+// Login — kobler Umami-sesjon til pseudonymisert bruker-ID:
+await identify(user.id, { rolle: user.role })
+
+// Logout — tøm session-identifisering:
+reset()
 ```
 
-Returnerer `{ trackEvent: (name: string, data?: Record<string, unknown>) => void }`. Er no-op dersom tracking er deaktivert.
+Returnerer `{ trackEvent, identify, reset }`. Alle funksjoner er no-op dersom tracking er deaktivert.
+
+- `trackEvent(name, data?)` — spor en navngitt hendelse med valgfrie attributter
+- `identify(userId, attrs?)` — kobler Umami-sesjon til pseudonymisert bruker-ID (hashes lokalt via SHA-256 før sending)
+- `reset()` — tøm session-identifisering ved logout
 
 ---
 
