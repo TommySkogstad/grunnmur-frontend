@@ -92,7 +92,7 @@ const api = createApiClient({
   onUnauthorized: (error) => {  // Kalles ved 401 (med deduplisering)
     window.location.href = '/logg-inn'
   },
-  retryCount: 2,                // Antall retries ved nettverksfeil/5xx — gjelder baade request() og formDataRequest() (default: 0)
+  retryCount: 2,                // Antall retries ved nettverksfeil/5xx — request() retriyer safe methods; formDataRequest() kun POST (default: 0)
   retryDelay: 500,              // Grunnforsinkelse i ms — dobles eksponentielt (default: 500)
 })
 ```

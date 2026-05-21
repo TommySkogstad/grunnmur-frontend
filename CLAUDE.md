@@ -45,7 +45,7 @@ npm run lint      # ESLint
 - `onUnauthorized`: callback for 401-håndtering
 - `csrfSource`: `'cookie'` | `'memory'`
 - `basePath`: default `/api`
-- `retryCount`: antall automatiske retries ved nettverksfeil eller 5xx — gjelder både `request()` og `formDataRequest()` (default: 0)
+- `retryCount`: antall automatiske retries ved nettverksfeil eller 5xx — `request()` retriyer safe methods (GET/HEAD/OPTIONS); `formDataRequest()` retriyer kun POST. PUT/PATCH/DELETE retriyer ikke (ikke idempotente) (default: 0)
 - `retryDelay`: grunnforsinkelse mellom retries i ms — dobles eksponentielt (default: 500)
 
 ### AuthContext
