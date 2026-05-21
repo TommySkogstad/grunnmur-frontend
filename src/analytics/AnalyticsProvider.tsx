@@ -13,7 +13,7 @@
  * ```
  */
 
-import { createContext, useContext, useEffect } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
 // Lokal augmentering av ImportMeta — unngår avhengighet av vite/client i biblioteket.
@@ -61,7 +61,8 @@ function isOptedOut(): boolean {
  * Laster Umami analytics-skriptet og tilgjengeliggjør tracking via kontekst.
  */
 export function AnalyticsProvider({ websiteId, scriptSrc, children }: AnalyticsProviderProps) {
-  const isEnabled = !import.meta.env.DEV && !isOptedOut()
+  const [optedOut] = useState(() => isOptedOut())
+  const isEnabled = !import.meta.env.DEV && !optedOut
 
   useEffect(() => {
     if (!isEnabled) return

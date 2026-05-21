@@ -2,7 +2,8 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, cleanup } from '@testing-library/react'
+import { render, cleanup, act } from '@testing-library/react'
+import { useState } from 'react'
 import { AnalyticsProvider } from './AnalyticsProvider'
 
 describe('AnalyticsProvider', () => {
@@ -54,6 +55,30 @@ describe('AnalyticsProvider', () => {
     const scripts = document.head.querySelectorAll('script[data-website-id="prod-id"]')
     expect(scripts.length).toBe(1)
     expect((scripts[0] as HTMLScriptElement).src).toBe('https://analytics.example.com/script.js')
+  })
+
+  it('opt-out leses kun én gang — localStorage-endring etter mount endrer ikke isEnabled', () => {
+    // Wrapper som tvinger re-render via state-endring i parent
+    function Wrapper() {
+      const [, setTick] = useState(0)
+      return (
+        <AnalyticsProvider websiteId="stable-id" scriptSrc="https://analytics.example.com/script.js">
+          <button onClick={() => setTick(t => t + 1)}>re-render</button>
+        </AnalyticsProvider>
+      )
+    }
+
+    const { getByText } = render(<Wrapper />)
+
+    // Script er lagt til på mount (ingen opt-out)
+    expect(document.head.querySelectorAll('script[data-website-id="stable-id"]').length).toBe(1)
+
+    // Sett opt-out etter mount og tving re-render
+    localStorage.setItem('umami.disabled', '1')
+    act(() => { getByText('re-render').click() })
+
+    // isEnabled skal IKKE ha endret seg — script skal fortsatt være i DOM
+    expect(document.head.querySelectorAll('script[data-website-id="stable-id"]').length).toBe(1)
   })
 
   it('rendrer children uavhengig av tracking-tilstand', () => {
