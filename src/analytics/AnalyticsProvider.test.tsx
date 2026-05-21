@@ -92,4 +92,40 @@ describe('AnalyticsProvider', () => {
 
     expect(getByText('Barn-innhold')).toBeDefined()
   })
+
+  it('script-tag fjernes fra document.head ved unmount', () => {
+    const { unmount } = render(
+      <AnalyticsProvider websiteId="prod-id" scriptSrc="https://analytics.example.com/script.js">
+        <div />
+      </AnalyticsProvider>
+    )
+    expect(document.head.querySelectorAll('script[data-website-id]').length).toBe(1)
+    unmount()
+    expect(document.head.querySelectorAll('script[data-website-id]').length).toBe(0)
+  })
+
+  it('console.warn trigges ved http:// scriptSrc', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(
+      <AnalyticsProvider websiteId="test-id" scriptSrc="http://analytics.example.com/script.js">
+        <div />
+      </AnalyticsProvider>
+    )
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[Analytics] scriptSrc bør bruke https://',
+      'http://analytics.example.com/script.js'
+    )
+    warnSpy.mockRestore()
+  })
+
+  it('console.warn trigges ikke ved https:// scriptSrc', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(
+      <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+        <div />
+      </AnalyticsProvider>
+    )
+    expect(warnSpy).not.toHaveBeenCalled()
+    warnSpy.mockRestore()
+  })
 })
