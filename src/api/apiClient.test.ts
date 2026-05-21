@@ -601,4 +601,26 @@ describe('formDataRequest', () => {
     const [, init] = mockFetch.mock.calls[0]
     expect(init.credentials).toBe('include')
   })
+
+  it('retrier ikke ved 503 for PUT-method selv med retryCount: 1', async () => {
+    mockFetch
+      .mockResolvedValueOnce(mockResponse({ error: 'Service Unavailable' }, 503, 'Service Unavailable'))
+      .mockResolvedValueOnce(mockResponse({ ok: true }))
+
+    const client = createApiClient({ retryCount: 1, retryDelay: 0 })
+
+    await expect(client.formDataRequest('/avatar', new FormData(), 'PUT')).rejects.toBeInstanceOf(ApiError)
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('retrier ikke ved 503 for PATCH-method selv med retryCount: 1', async () => {
+    mockFetch
+      .mockResolvedValueOnce(mockResponse({ error: 'Service Unavailable' }, 503, 'Service Unavailable'))
+      .mockResolvedValueOnce(mockResponse({ ok: true }))
+
+    const client = createApiClient({ retryCount: 1, retryDelay: 0 })
+
+    await expect(client.formDataRequest('/avatar', new FormData(), 'PATCH')).rejects.toBeInstanceOf(ApiError)
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
 })
