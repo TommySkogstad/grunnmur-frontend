@@ -272,7 +272,8 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
     }
 
     // Ikke sett Content-Type — nettleseren setter multipart boundary selv
-    // Retry alltid basert på retryCount: filopplastninger er sårbare for transiente nettverksfeil
+    // Kun POST retries: PUT/PATCH/DELETE er ikke nødvendigvis idempotente
+    const maxFormAttempts = upperMethod === 'POST' ? 1 + retryCount : 1
     return fetchWithRetry<T>(
       () => fetch(`${basePath}${path}`, {
         method: upperMethod,
@@ -280,7 +281,7 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
         body: formData,
         credentials: 'include',
       }),
-      1 + retryCount
+      maxFormAttempts
     )
   }
 
