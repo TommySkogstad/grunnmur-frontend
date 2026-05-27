@@ -8,7 +8,7 @@ Tilsvarer `grunnmur` (Kotlin-bibliotek) for backend, men for React/TypeScript fr
 
 ## Teknologier
 
-- **Språk**: TypeScript 5.7+
+- **Språk**: TypeScript 6.0+
 - **Framework**: React 18/19
 - **Test**: Vitest + Testing Library
 - **Publisering**: GitHub Packages (privat, @tommyskogstad scope)
@@ -69,6 +69,9 @@ npm run lint      # ESLint
 | 6810 | In-memory CSRF |
 | styreportal | Multi-tenant (TenantContext) |
 | biologportal | React Query, TOTP, Observer-rolle |
+| maskemester | Claude API-integrasjon, strikkekalkulator |
+| vinforalle | Quiz og anbefalinger |
+| smart-casual | Under oppstart |
 
 ## Konvensjoner
 
