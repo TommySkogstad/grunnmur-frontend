@@ -6,6 +6,13 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fikset
+- `formDataRequest()` retrijer nå kun POST — PUT/PATCH/DELETE retrijes ikke (ikke idempotente). Fixes #110.
+- brace-expansion bumped til 5.0.6 for å patche GHSA-jxxr-4gwj-5jf2. Fixes #116.
+
+### Forbedret
+- `AnalyticsProvider`: `isOptedOut()` cachet via lazy `useState` — unngår gjentatte `localStorage`-kall per render. Fixes #111.
+
 ## [1.0.2] - 2026-05-20
 
 ### Lagt til
