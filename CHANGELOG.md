@@ -12,6 +12,7 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ### Forbedret
 - `AnalyticsProvider`: `isOptedOut()` cachet via lazy `useState` — unngår gjentatte `localStorage`-kall per render. Fixes #111.
+- `AnalyticsProvider`: ny valgfri prop `isDev?: boolean` (default `false`) erstatter intern `import.meta.env.DEV`-sjekk og den globale `ImportMeta`-augmenteringen. Konsumentapper bør sende `isDev={import.meta.env.DEV}` for å beholde gjeldende opptreden. Fixes #129.
 
 ## [1.0.2] - 2026-05-20
 

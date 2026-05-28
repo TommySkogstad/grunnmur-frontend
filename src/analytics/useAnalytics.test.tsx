@@ -21,13 +21,12 @@ function TestComponent({ onTrack }: { onTrack: (name: string) => void }) {
 describe('useAnalytics', () => {
   afterEach(() => {
     cleanup()
-    vi.unstubAllEnvs()
     // Rydd opp window.umami-mock
     delete (window as Window & { umami?: unknown }).umami
   })
 
   it('trackEvent er no-op når window.umami er undefined', async () => {
-    vi.stubEnv('DEV', false)
+
     const onTrack = vi.fn()
 
     const { getByText } = render(
@@ -46,7 +45,7 @@ describe('useAnalytics', () => {
   })
 
   it('trackEvent kaller window.umami.track når umami er tilgjengelig', async () => {
-    vi.stubEnv('DEV', false)
+
     const mockTrack = vi.fn()
     ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
 
@@ -66,7 +65,7 @@ describe('useAnalytics', () => {
   })
 
   it('trackEvent er no-op utenfor AnalyticsProvider (context-default isEnabled=false)', async () => {
-    vi.stubEnv('DEV', false)
+
     const mockTrack = vi.fn()
     ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
 
@@ -84,15 +83,14 @@ describe('useAnalytics', () => {
     expect(onTrack).toHaveBeenCalledOnce()
   })
 
-  it('trackEvent er no-op i dev-modus (DEV=true)', async () => {
-    vi.stubEnv('DEV', true)
+  it('trackEvent er no-op i dev-modus (isDev=true)', async () => {
     const mockTrack = vi.fn()
     ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
 
     const onTrack = vi.fn()
 
     const { getByText } = render(
-      <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+      <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js" isDev={true}>
         <TestComponent onTrack={onTrack} />
       </AnalyticsProvider>
     )
@@ -138,7 +136,7 @@ describe('useAnalytics', () => {
     }
 
     it('kaller window.umami.identify med hashet id + attrs', async () => {
-      vi.stubEnv('DEV', false)
+  
       const mockIdentify = vi.fn()
       ;(window as Window & { umami?: { track: () => void; identify: typeof mockIdentify } }).umami = {
         track: vi.fn(),
@@ -162,7 +160,7 @@ describe('useAnalytics', () => {
     })
 
     it('userId=null kaller identify({}) for å rydde session', async () => {
-      vi.stubEnv('DEV', false)
+  
       const mockIdentify = vi.fn()
       ;(window as Window & { umami?: { track: () => void; identify: typeof mockIdentify } }).umami = {
         track: vi.fn(),
@@ -183,7 +181,6 @@ describe('useAnalytics', () => {
     })
 
     it('er no-op i dev-modus', async () => {
-      vi.stubEnv('DEV', true)
       const mockIdentify = vi.fn()
       ;(window as Window & { umami?: { track: () => void; identify: typeof mockIdentify } }).umami = {
         track: vi.fn(),
@@ -191,7 +188,7 @@ describe('useAnalytics', () => {
       }
 
       const { getByText } = render(
-        <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+        <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js" isDev={true}>
           <IdentifyComponent userId={1} />
         </AnalyticsProvider>
       )
@@ -211,7 +208,7 @@ describe('useAnalytics', () => {
     }
 
     it('kaller window.umami.identify({}) for å rydde session', async () => {
-      vi.stubEnv('DEV', false)
+  
       const mockIdentify = vi.fn()
       ;(window as Window & { umami?: { track: () => void; identify: typeof mockIdentify } }).umami = {
         track: vi.fn(),
@@ -232,7 +229,7 @@ describe('useAnalytics', () => {
     })
 
     it('er no-op når isEnabled=false (utenfor provider)', async () => {
-      vi.stubEnv('DEV', false)
+  
       const mockIdentify = vi.fn()
       ;(window as Window & { umami?: { track: () => void; identify: typeof mockIdentify } }).umami = {
         track: vi.fn(),

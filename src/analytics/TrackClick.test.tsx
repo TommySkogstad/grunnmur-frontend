@@ -1,19 +1,14 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, act, cleanup } from '@testing-library/react'
 import { TrackClick } from './TrackClick'
 import { AnalyticsProvider } from './AnalyticsProvider'
 
 describe('TrackClick', () => {
-  beforeEach(() => {
-    vi.stubEnv('DEV', false)
-  })
-
   afterEach(() => {
     cleanup()
-    vi.unstubAllEnvs()
     delete (window as Window & { umami?: unknown }).umami
   })
 
@@ -69,12 +64,11 @@ describe('TrackClick', () => {
   })
 
   it('sporer ikke klikk i DEV-modus', async () => {
-    vi.stubEnv('DEV', true)
     const mockTrack = vi.fn()
     ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
 
     const { getByText } = render(
-      <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+      <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js" isDev={true}>
         <TrackClick event="btn.klikk">
           <button>Klikk</button>
         </TrackClick>
