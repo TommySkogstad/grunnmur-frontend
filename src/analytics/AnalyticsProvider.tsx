@@ -7,7 +7,11 @@
  *
  * @example
  * ```tsx
- * <AnalyticsProvider websiteId="abc123" scriptSrc="https://analytics.example.com/script.js">
+ * <AnalyticsProvider
+ *   websiteId="abc123"
+ *   scriptSrc="https://analytics.example.com/script.js"
+ *   isDev={import.meta.env.DEV}
+ * >
  *   <App />
  * </AnalyticsProvider>
  * ```
