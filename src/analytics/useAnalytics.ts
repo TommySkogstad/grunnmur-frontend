@@ -17,7 +17,7 @@
  */
 
 import { useCallback } from 'react'
-import { useAnalyticsContext } from './AnalyticsProvider'
+import { useAnalyticsContext } from './analyticsContext'
 
 declare global {
   interface Window {
