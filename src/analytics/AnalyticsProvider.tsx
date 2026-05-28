@@ -16,17 +16,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-// Lokal augmentering av ImportMeta — unngår avhengighet av vite/client i biblioteket.
-// Konsumentenes bundler (Vite) erstatter import.meta.env.DEV ved build.
-declare global {
-  interface ImportMeta {
-    readonly env: {
-      readonly DEV: boolean
-      readonly [key: string]: unknown
-    }
-  }
-}
-
 /** @internal — brukt av useAnalytics og usePageView */
 export interface AnalyticsContextValue {
   isEnabled: boolean
@@ -46,6 +35,11 @@ export interface AnalyticsProviderProps {
   websiteId: string
   /** URL til Umami script */
   scriptSrc: string
+  /**
+   * Om appen kjøres i dev-modus. Sett til `import.meta.env.DEV` i konsumentappen.
+   * Når `true` lastes ikke analytics-skriptet. Default `false`.
+   */
+  isDev?: boolean
   children: ReactNode
 }
 
@@ -60,9 +54,9 @@ function isOptedOut(): boolean {
 /**
  * Laster Umami analytics-skriptet og tilgjengeliggjør tracking via kontekst.
  */
-export function AnalyticsProvider({ websiteId, scriptSrc, children }: AnalyticsProviderProps) {
+export function AnalyticsProvider({ websiteId, scriptSrc, isDev = false, children }: AnalyticsProviderProps) {
   const [optedOut] = useState(() => isOptedOut())
-  const isEnabled = !import.meta.env.DEV && !optedOut
+  const isEnabled = !isDev && !optedOut
 
   useEffect(() => {
     if (!isEnabled) return

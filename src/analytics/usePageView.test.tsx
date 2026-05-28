@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, act, cleanup } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import { usePageView } from './usePageView'
@@ -31,13 +31,8 @@ function TestApp() {
 }
 
 describe('usePageView', () => {
-  beforeEach(() => {
-    vi.stubEnv('DEV', false)
-  })
-
   afterEach(() => {
     cleanup()
-    vi.unstubAllEnvs()
     delete (window as Window & { umami?: unknown }).umami
   })
 
@@ -64,11 +59,19 @@ describe('usePageView', () => {
   })
 
   it('kaller IKKE window.umami.track i DEV-modus', () => {
-    vi.stubEnv('DEV', true)
     const mockTrack = vi.fn()
     ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
 
-    render(<TestApp />)
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js" isDev={true}>
+          <PageViewTracker />
+          <Routes>
+            <Route path="*" element={<NavigateButton to="/om-oss" />} />
+          </Routes>
+        </AnalyticsProvider>
+      </MemoryRouter>
+    )
 
     expect(mockTrack).not.toHaveBeenCalled()
   })

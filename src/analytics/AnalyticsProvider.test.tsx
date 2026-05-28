@@ -9,12 +9,10 @@ import { AnalyticsProvider } from './AnalyticsProvider'
 describe('AnalyticsProvider', () => {
   beforeEach(() => {
     localStorage.clear()
-    vi.stubEnv('DEV', false)
   })
 
   afterEach(() => {
     cleanup()
-    vi.unstubAllEnvs()
     // Rydd opp script-tags som kan være lagt til
     document.head.querySelectorAll('script[data-website-id]').forEach(s => s.remove())
   })
@@ -32,17 +30,26 @@ describe('AnalyticsProvider', () => {
     expect(scripts.length).toBe(0)
   })
 
-  it('script-tag legges IKKE til i dev-modus (DEV=true)', () => {
-    vi.stubEnv('DEV', true)
-
+  it('script-tag legges IKKE til når isDev={true}', () => {
     render(
-      <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+      <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js" isDev={true}>
         <div>innhold</div>
       </AnalyticsProvider>
     )
 
     const scripts = document.head.querySelectorAll('script[data-website-id]')
     expect(scripts.length).toBe(0)
+  })
+
+  it('script-tag legges til når isDev={false}', () => {
+    render(
+      <AnalyticsProvider websiteId="dev-false-id" scriptSrc="https://analytics.example.com/script.js" isDev={false}>
+        <div>innhold</div>
+      </AnalyticsProvider>
+    )
+
+    const scripts = document.head.querySelectorAll('script[data-website-id="dev-false-id"]')
+    expect(scripts.length).toBe(1)
   })
 
   it('script-tag legges til i produksjonsmodus uten opt-out', () => {
