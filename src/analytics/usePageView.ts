@@ -14,7 +14,7 @@
 
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useAnalyticsContext } from './AnalyticsProvider'
+import { useAnalyticsContext } from './analyticsContext'
 
 /**
  * Kaller window.umami.track ved pathname-endringer.

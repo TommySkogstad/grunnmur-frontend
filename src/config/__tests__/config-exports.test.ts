@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
 import { VERSION } from '../../index'
+import * as indexExports from '../../index'
 
 const ROOT = resolve(__dirname, '..', '..', '..')
 
@@ -99,6 +100,26 @@ describe('VERSION er synkronisert med package.json', () => {
   it('VERSION matcher package.json-versjon', () => {
     const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8'))
     expect(VERSION).toBe(pkg.version)
+  })
+})
+
+describe('Analytics interne symboler er ikke i public API', () => {
+  it('useAnalyticsContext er ikke eksportert fra index', () => {
+    expect('useAnalyticsContext' in indexExports).toBe(false)
+  })
+
+  it('AnalyticsContext er ikke eksportert fra index', () => {
+    expect('AnalyticsContext' in indexExports).toBe(false)
+  })
+
+  it('AnalyticsContext er ikke eksportert fra AnalyticsProvider-modulen', async () => {
+    const mod = await import('../../analytics/AnalyticsProvider')
+    expect('AnalyticsContext' in mod).toBe(false)
+  })
+
+  it('useAnalyticsContext er ikke eksportert fra AnalyticsProvider-modulen', async () => {
+    const mod = await import('../../analytics/AnalyticsProvider')
+    expect('useAnalyticsContext' in mod).toBe(false)
   })
 })
 
