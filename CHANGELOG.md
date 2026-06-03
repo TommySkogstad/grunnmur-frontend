@@ -36,7 +36,7 @@ Dev-dependencies bumpet som del av koordinert frontend-dep-migrasjon (paraply #4
 - `eslint` 9.x → 10.2.x (#50)
 - `@eslint/js` 9.x → 10.x (#50)
 
-Alle 246 tester passerer, ingen kode-endring trengs. Konsumentapper (biologportal, lo-finans, 6810, styreportal) bør bumpes tilsvarende når de neste gang `npm install`-er grunnmur — ellers kan IDE vise type-warnings på strengere TS 6-inferens.
+Alle 246 tester passerer, ingen kode-endring trengs. Konsumentapper (biologportal, lo-finans _(arkivert 2026-05-19)_, 6810, styreportal) bør bumpes tilsvarende når de neste gang `npm install`-er grunnmur — ellers kan IDE vise type-warnings på strengere TS 6-inferens.
 
 ## [1.0.0] - 2026-04-08
 
