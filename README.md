@@ -391,19 +391,24 @@ Laster Umami analytics-skriptet og tilgjengeliggjør tracking via React Context.
 ```tsx
 import { AnalyticsProvider, useAnalytics, TrackClick, usePageView } from '@tommyskogstad/frontend-core'
 
-<AnalyticsProvider websiteId="abc123" scriptSrc="https://analytics.example.com/script.js">
+<AnalyticsProvider
+  websiteId="abc123"
+  scriptSrc="https://analytics.example.com/script.js"
+  isDev={import.meta.env.DEV}
+>
   <App />
 </AnalyticsProvider>
 ```
 
-| Prop | Type | Beskrivelse |
-|------|------|-------------|
-| `websiteId` | `string` | Umami website ID |
-| `scriptSrc` | `string` | URL til Umami-skriptet (må være HTTPS) |
-| `children` | `ReactNode` | React-barn |
+| Prop | Type | Default | Beskrivelse |
+|------|------|---------|-------------|
+| `websiteId` | `string` | — | Umami website ID |
+| `scriptSrc` | `string` | — | URL til Umami-skriptet (må være HTTPS) |
+| `isDev` | `boolean` | `false` | Hopper over script-innlasting når `true`. Sett til `import.meta.env.DEV` i konsumentappen. |
+| `children` | `ReactNode` | — | React-barn |
 
 **Oppførsel:**
-- Hopper over innlasting i dev-modus (`import.meta.env.DEV`)
+- Hopper over innlasting dersom `isDev={true}` sendes inn (konsumenten sender `isDev={import.meta.env.DEV}`) — sjekkes ikke automatisk
 - Hopper over hvis bruker har satt `localStorage.umami.disabled = '1'` (opt-out)
 - Varsler i konsollen hvis scriptSrc ikke bruker HTTPS
 
