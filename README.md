@@ -31,7 +31,7 @@ Pakken krever disse som peer dependencies:
 |-------|---------|-------------|
 | `react` | ^18.0 \|\| ^19.0 | Ja |
 | `react-dom` | ^18.0 \|\| ^19.0 | Ja |
-| `react-router-dom` | ^6.0 \|\| ^7.0 | Ja |
+| `react-router-dom` | ^7.0 | Ja |
 | `@tanstack/react-query` | ^5.0 | Valgfritt |
 
 ## Quick start
