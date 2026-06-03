@@ -65,7 +65,6 @@ npm run lint      # ESLint
 
 | App | Spesielle hensyn |
 |-----|------------------|
-| summa-summarum | Pilot. Enklest app |
 | 6810 | In-memory CSRF |
 | styreportal | Multi-tenant (TenantContext) |
 | biologportal | React Query, TOTP, Observer-rolle |
