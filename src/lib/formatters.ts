@@ -59,11 +59,6 @@ export function formatDateTime(date: string | Date): string {
 // Cache for formatNumber med ulike desimalverdier
 const numberFmtCache = new Map<number | undefined, Intl.NumberFormat>()
 
-/** Eksponerer cache-størrelse for testing — ikke bruk i produksjonskode */
-export function _numberFmtCacheSize(): number {
-  return numberFmtCache.size
-}
-
 /** Formaterer tall med norsk tusenskilletegn og valgfritt antall desimaler */
 export function formatNumber(num: number, decimals?: number): string {
   if (!isFinite(num)) return DASH
