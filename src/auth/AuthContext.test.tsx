@@ -720,6 +720,40 @@ describe('createAuthProvider', () => {
     expect(screen.getByTestId('auth').textContent).toBe('false')
   })
 
+  it('login: resetUnauthorizedFlag kalles selv når verifyCode kaster', async () => {
+    vi.mocked(mockClient.request).mockImplementation(async (path: string) => {
+      if (path === '/auth/me') throw new ApiError('Unauthorized', 401, 'Unauthorized')
+      if (path === '/auth/verify-code') throw new ApiError('Ugyldig kode', 401, 'Unauthorized')
+      return undefined
+    })
+
+    const { AuthProvider, useAuth } = createAuthProvider<TestUser>({
+      apiClient: mockClient,
+    })
+
+    let loginFn: ((email: string, code: string) => Promise<unknown>) | null = null
+
+    function TestComponent() {
+      const { login } = useAuth()
+      loginFn = login
+      return <div />
+    }
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    await waitFor(() => expect(loginFn).not.toBeNull())
+
+    await expect(act(async () => {
+      await loginFn!('ola@example.com', 'feil-kode')
+    })).rejects.toThrow()
+
+    expect(mockClient.resetUnauthorizedFlag).toHaveBeenCalled()
+  })
+
   it('unmount under pågående fetchUser produserer ikke feil etter resolve', async () => {
     let resolveMe: ((value: TestUser) => void) | undefined
 

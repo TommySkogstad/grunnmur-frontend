@@ -136,10 +136,9 @@ export function createAuthProvider<TUser>(config: AuthProviderConfig<TUser>): {
     }, [fetchUser])
 
     const login = useCallback(async (email: string, code: string): Promise<LoginResponse> => {
-      const response = await authApi.verifyCode(email, code)
-      // Etter vellykket login, hent brukerinfo
-      await fetchUser()
       apiClient.resetUnauthorizedFlag()
+      const response = await authApi.verifyCode(email, code)
+      await fetchUser()
       return response
     }, [fetchUser])
 
