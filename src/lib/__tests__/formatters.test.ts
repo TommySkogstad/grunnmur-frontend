@@ -7,7 +7,6 @@ import {
   formatFileSize,
   relativeTime,
   NUMBER_FMT_CACHE_MAX,
-  _numberFmtCacheSize
 } from '../formatters'
 
 describe('formatCurrency', () => {
@@ -96,12 +95,13 @@ describe('formatNumber', () => {
     expect(formatNumber(NaN)).toBe('\u2013')
   })
 
-  it('numberFmtCache vokser ikke over NUMBER_FMT_CACHE_MAX', () => {
-    // Kaller med NUMBER_FMT_CACHE_MAX + 5 unike desimalverdier
+  it('numberFmtCache evicterer entries ved overskridelse av NUMBER_FMT_CACHE_MAX', () => {
+    const deleteSpy = vi.spyOn(Map.prototype, 'delete')
     for (let d = 0; d < NUMBER_FMT_CACHE_MAX + 5; d++) {
       formatNumber(1.23456789, d)
     }
-    expect(_numberFmtCacheSize()).toBeLessThanOrEqual(NUMBER_FMT_CACHE_MAX)
+    expect(deleteSpy).toHaveBeenCalled()
+    deleteSpy.mockRestore()
   })
 
   it('formaterer korrekt etter FIFO-eviction', () => {

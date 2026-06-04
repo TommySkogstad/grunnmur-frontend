@@ -103,6 +103,13 @@ describe('VERSION er synkronisert med package.json', () => {
   })
 })
 
+describe('Formatter interne symboler er ikke i public API', () => {
+  it('_numberFmtCacheSize er ikke eksportert fra formatters-modulen', async () => {
+    const mod = await import('../../lib/formatters')
+    expect('_numberFmtCacheSize' in mod).toBe(false)
+  })
+})
+
 describe('Analytics interne symboler er ikke i public API', () => {
   it('useAnalyticsContext er ikke eksportert fra index', () => {
     expect('useAnalyticsContext' in indexExports).toBe(false)
