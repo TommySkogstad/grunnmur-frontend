@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act, waitFor, cleanup } from '@testing-library/react'
 import { createAuthProvider } from './AuthContext'
 import { ApiError } from '../api/apiClient'
-import type { ApiClient } from '../api/apiClient'
+import { createMockApiClient } from '../test/testHelpers'
 
 interface TestUser {
   id: number
@@ -14,16 +14,6 @@ interface TestUser {
 }
 
 const testUser: TestUser = { id: 1, email: 'ola@example.com', role: 'admin' }
-
-function createMockApiClient(): ApiClient {
-  return {
-    request: vi.fn(),
-    formDataRequest: vi.fn(),
-    getCsrfToken: vi.fn(() => null),
-    setCsrfToken: vi.fn(),
-    resetUnauthorizedFlag: vi.fn(),
-  }
-}
 
 describe('createAuthProvider', () => {
   let mockClient: ApiClient
