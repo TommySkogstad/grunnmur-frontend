@@ -29,13 +29,13 @@ npm run lint      # ESLint
 |-------|-------------|--------|
 | `api/apiClient` | Konfigurerbar fetch-wrapper med CSRF | Implementert |
 | `auth/AuthContext` | Generisk AuthProvider med hooks | Implementert |
-| `auth/authApi` | requestCode, verifyCode, getMe, logout | Implementert |
+| `auth/authApi` | requestCode, verifyCode, getMe, getSession, logout | Implementert |
 | `components/ErrorBoundary` | Styling-agnostisk error boundary | Implementert |
 | `components/ProtectedRoute` | Konfigurerbar med roleCheck callback | Implementert |
 | `lib/queryClient` | Standard QueryClient-config | Implementert |
 | `lib/formatters` | Dato, valuta, tall | Implementert |
 | `analytics/AnalyticsProvider` | Umami-provider med opt-out og dev-mode | Implementert |
-| `analytics/useAnalytics` | Hook for manuell event-sporing | Implementert |
+| `analytics/useAnalytics` | Hook for manuell event-sporing — returnerer `{ trackEvent, identify, reset }` | Implementert |
 | `analytics/TrackClick` | Deklarativ wrapper for klikk-sporing | Implementert |
 | `analytics/usePageView` | Hook for SPA-sidevisnings-sporing | Implementert |
 
