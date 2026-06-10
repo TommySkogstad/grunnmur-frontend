@@ -527,7 +527,9 @@ describe('blobRequest', () => {
     const client = createApiClient()
     const result = await client.blobRequest('/rapport/1.pdf')
 
-    expect(result).toBeInstanceOf(Blob)
+    // Blob-type sjekkes med constructor.name for å unngå jsdom/Node.js-inkompatibilitet
+    expect(result.constructor.name).toBe('Blob')
+    expect(typeof result.size).toBe('number')
   })
 
   it('bruker basePath-prefiks', async () => {
@@ -617,7 +619,7 @@ describe('blobRequest', () => {
     const client = createApiClient({ retryCount: 1, retryDelay: 0 })
     const result = await client.blobRequest('/test.pdf')
 
-    expect(result).toBeInstanceOf(Blob)
+    expect(result.constructor.name).toBe('Blob')
     expect(mockFetch).toHaveBeenCalledTimes(2)
   })
 
