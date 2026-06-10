@@ -146,7 +146,8 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
   }
 
   function setCsrfToken(token: string): void {
-    if (csrfSource !== 'memory' && process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (csrfSource !== 'memory' && (import.meta as any).env?.PROD !== true) {
       console.warn(
         '[ApiClient] setCsrfToken() kallt i cookie-mode — kallet er en no-op. ' +
         'Bruk csrfSource: "memory" hvis du vil styre token manuelt.'
