@@ -29,15 +29,6 @@ declare global {
     }
 }
 /**
- * Hash en bruker-ID til et pseudonym (16 hex-tegn) via SHA-256.
- *
- * Salt er per-app (default = window.location.hostname) slik at samme bruker
- * får ulike pseudonymer på tvers av apper — forhindrer cross-app-tracking.
- *
- * @internal
- */
-export declare function hashUserId(userId: string, salt?: string): Promise<string>;
-/**
  * Returnerer trackEvent, identify og reset for analytics.
  *
  * Alle funksjoner er no-op dersom tracking er deaktivert (DEV-modus,

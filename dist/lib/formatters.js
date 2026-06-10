@@ -18,7 +18,7 @@ let dateFmt;
 let dateTimeFmt;
 let relativeFmt;
 /** Maks antall entries i numberFmtCache — FIFO-purge ved overskridelse */
-export const NUMBER_FMT_CACHE_MAX = 10;
+const NUMBER_FMT_CACHE_MAX = 10;
 /** Konverterer string | Date til Date, eller null ved ugyldig input */
 function toDate(input) {
     if (input == null)

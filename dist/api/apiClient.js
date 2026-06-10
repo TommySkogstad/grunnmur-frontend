@@ -77,6 +77,11 @@ export function createApiClient(config) {
         return getCookieValue(csrfCookieName);
     }
     function setCsrfToken(token) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (csrfSource !== 'memory' && import.meta.env?.DEV === true) {
+            console.warn('[ApiClient] setCsrfToken() kallt i cookie-mode — kallet er en no-op. ' +
+                'Bruk csrfSource: "memory" hvis du vil styre token manuelt.');
+        }
         memoryCsrfToken = token;
     }
     function resetUnauthorizedFlag() {
@@ -123,7 +128,7 @@ export function createApiClient(config) {
             throw new ApiError('Ugyldig JSON i respons', response.status, response.statusText);
         }
     }
-    async function fetchWithRetry(fn, maxAttempts) {
+    async function fetchWithRetry(fn, maxAttempts, parser = parseResponse) {
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             let response;
             try {
@@ -145,7 +150,7 @@ export function createApiClient(config) {
                 }
                 return handleErrorResponse(response);
             }
-            return parseResponse(response);
+            return parser(response);
         }
         // Nådd kun hvis maxAttempts er 0 (aldri i praksis siden minimum er 1)
         throw new ApiError('Nettverksfeil — sjekk tilkoblingen', 0, 'NetworkError');
@@ -187,9 +192,22 @@ export function createApiClient(config) {
             credentials: 'include',
         }), maxFormAttempts);
     }
+    async function blobRequest(path, options) {
+        const method = (options?.method ?? 'GET').toUpperCase();
+        const headers = { ...options?.headers };
+        const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1;
+        if (!SAFE_METHODS.has(method)) {
+            const token = getCsrfToken();
+            if (token) {
+                headers[csrfHeaderName] = token;
+            }
+        }
+        return fetchWithRetry(() => fetch(`${basePath}${path}`, { method, headers, credentials: 'include' }), maxAttempts, (response) => response.blob());
+    }
     return {
         request,
         formDataRequest,
+        blobRequest,
         getCsrfToken,
         setCsrfToken,
         resetUnauthorizedFlag,

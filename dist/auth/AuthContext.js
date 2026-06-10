@@ -76,7 +76,7 @@ export function createAuthProvider(config) {
                     onSessionError?.(error);
                 }
             }
-        }, []);
+        }, []); // authApi, parseUser, useSessionEndpoint og onSessionError er factory-scope konstanter, ikke React-tilstand
         const refreshUser = useCallback(async () => {
             await fetchUser();
         }, [fetchUser]);
