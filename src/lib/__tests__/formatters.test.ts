@@ -6,8 +6,9 @@ import {
   formatNumber,
   formatFileSize,
   relativeTime,
-  NUMBER_FMT_CACHE_MAX,
 } from '../formatters'
+
+const NUMBER_FMT_CACHE_MAX = 10
 
 describe('formatCurrency', () => {
   it('formaterer positive beloep i NOK', () => {

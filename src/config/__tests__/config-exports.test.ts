@@ -108,9 +108,19 @@ describe('Formatter interne symboler er ikke i public API', () => {
     const mod = await import('../../lib/formatters')
     expect('_numberFmtCacheSize' in mod).toBe(false)
   })
+
+  it('NUMBER_FMT_CACHE_MAX er ikke eksportert fra formatters-modulen', async () => {
+    const mod = await import('../../lib/formatters')
+    expect('NUMBER_FMT_CACHE_MAX' in mod).toBe(false)
+  })
 })
 
 describe('Analytics interne symboler er ikke i public API', () => {
+  it('hashUserId er ikke eksportert fra useAnalytics-modulen', async () => {
+    const mod = await import('../../analytics/useAnalytics')
+    expect('hashUserId' in mod).toBe(false)
+  })
+
   it('useAnalyticsContext er ikke eksportert fra index', () => {
     expect('useAnalyticsContext' in indexExports).toBe(false)
   })

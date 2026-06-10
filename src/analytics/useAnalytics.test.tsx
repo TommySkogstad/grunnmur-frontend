@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, act, cleanup, waitFor } from '@testing-library/react'
-import { useAnalytics, hashUserId } from './useAnalytics'
+import { useAnalytics } from './useAnalytics'
 import { AnalyticsProvider } from './AnalyticsProvider'
 
 function TestComponent({ onTrack }: { onTrack: (name: string) => void }) {
@@ -100,25 +100,6 @@ describe('useAnalytics', () => {
     })
 
     expect(mockTrack).not.toHaveBeenCalled()
-  })
-
-  describe('hashUserId', () => {
-    it('genererer 16-tegns hex-pseudonym', async () => {
-      const hash = await hashUserId('user-123', 'app.example.com')
-      expect(hash).toMatch(/^[0-9a-f]{16}$/)
-    })
-
-    it('samme input gir samme hash', async () => {
-      const h1 = await hashUserId('user-123', 'app.example.com')
-      const h2 = await hashUserId('user-123', 'app.example.com')
-      expect(h1).toBe(h2)
-    })
-
-    it('forskjellig salt gir forskjellig hash (cross-app-isolasjon)', async () => {
-      const a = await hashUserId('user-123', 'app-a.example.com')
-      const b = await hashUserId('user-123', 'app-b.example.com')
-      expect(a).not.toBe(b)
-    })
   })
 
   describe('identify', () => {
