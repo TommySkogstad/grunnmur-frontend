@@ -3,17 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createAuthApi } from './authApi'
-import type { ApiClient } from '../api/apiClient'
-
-function createMockApiClient(): ApiClient {
-  return {
-    request: vi.fn(),
-    formDataRequest: vi.fn(),
-    getCsrfToken: vi.fn(() => null),
-    setCsrfToken: vi.fn(),
-    resetUnauthorizedFlag: vi.fn(),
-  }
-}
+import { createMockApiClient } from '../test/testHelpers'
 
 describe('createAuthApi', () => {
   let mockClient: ApiClient
