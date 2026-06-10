@@ -38,7 +38,7 @@ declare global {
  *
  * @internal
  */
-export async function hashUserId(userId: string, salt?: string): Promise<string> {
+async function hashUserId(userId: string, salt?: string): Promise<string> {
   const effectiveSalt = salt ?? (typeof window !== 'undefined' ? window.location.hostname : '')
   const data = new TextEncoder().encode(`${userId}:${effectiveSalt}`)
   const hash = await crypto.subtle.digest('SHA-256', data)
