@@ -2,3 +2,5 @@ node_modules/
 *.tgz
 .env
 .env.local
+# Prevents self-referencing symlink from being accidentally committed (recreated by consumer builds)
+grunnmur-frontend
