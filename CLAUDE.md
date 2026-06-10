@@ -18,10 +18,12 @@ Tilsvarer `grunnmur` (Kotlin-bibliotek) for backend, men for React/TypeScript fr
 
 ```bash
 npm install       # Installer avhengigheter
-npm run build     # Bygg til dist/
+npm run build     # Bygg til dist/ (og commit dist/ — CI krever freshness)
 npm test          # Kjør tester
 npm run lint      # ESLint
 ```
+
+**Viktig:** Etter endringer i `src/` må du kjøre `npm run build` og committe `dist/` — CI vil feile hvis dist/ ikke er fresh. Se issue #186 for bakgrunn.
 
 ## Moduler
 

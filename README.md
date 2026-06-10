@@ -707,6 +707,18 @@ npm test          # Kjor tester
 npm run lint      # ESLint
 ```
 
+### dist/ må alltid være fresh
+
+CI kjører `npm run build` og verifiserer at `dist/` matcher — hvis dist/ er utdatert, feiler build-validering. Når du endrer kildekode:
+
+```bash
+npm run build    # Rebuild dist/
+git add dist/    # Commit built artifacts
+git commit -m "rebuild dist/"
+```
+
+Hvis CI feiler med "dist/ er utdatert", kjør `npm run build` og commit endringene.
+
 ## Lisens
 
 Privat — kun for intern bruk i portefoljen.
