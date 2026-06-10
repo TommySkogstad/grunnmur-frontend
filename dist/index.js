@@ -18,6 +18,8 @@ export { createProtectedRoute } from './components/ProtectedRoute';
 export { createQueryClient } from './query/queryClient';
 // Formatters
 export { formatCurrency, formatDate, formatDateTime, formatNumber, formatFileSize, relativeTime } from './lib/formatters';
+// Context
+export { ToastProvider, useToast } from './context/ToastContext';
 // Analytics
 export { AnalyticsProvider } from './analytics/AnalyticsProvider';
 export { useAnalytics } from './analytics/useAnalytics';
