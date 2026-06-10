@@ -286,6 +286,49 @@ import type { ErrorBoundaryProps } from '@tommyskogstad/frontend-core'
 
 ---
 
+### `ToastProvider` og `useToast()`
+
+Toast-varsler for brukerfeedback (success, error, info) med auto-dismiss og styling via Tailwind.
+
+```tsx
+import { ToastProvider, useToast } from '@tommyskogstad/frontend-core'
+
+// Wrap app-roten
+<ToastProvider>
+  <App />
+</ToastProvider>
+
+// Bruk i komponenter
+function MyComponent() {
+  const { showToast } = useToast()
+
+  const handleClick = () => {
+    showToast('Operasjonen lyktes!', 'success')
+  }
+
+  return <button onClick={handleClick}>Gjør noe</button>
+}
+```
+
+**API:**
+
+| Funksjon | Beskrivelse |
+|----------|-------------|
+| `showToast(message, type)` | Viser en toast-varsling (auto-dismiss etter 4s) |
+
+**Typer:**
+
+- `type: 'success' \| 'error' \| 'info'` — styrer farge og ikon
+
+**Egenskaper:**
+- Fixed positioning (bottom-right)
+- Auto-dismiss etter 4 sekunder
+- Lukk-knapp for manuell dismiss
+- Ikoner: ✓ (success), ⚠ (error), ℹ (info)
+- ARIA-live region for skjermlesere
+
+---
+
 ### `createProtectedRoute<TUser>(useAuth)`
 
 Factory-funksjon for rutebeskyttelse. Returneres automatisk fra `createAuthProvider()`, men kan ogsa brukes separat.

@@ -32,6 +32,7 @@ npm run lint      # ESLint
 | `auth/authApi` | requestCode, verifyCode, getMe, getSession, logout | Implementert |
 | `components/ErrorBoundary` | Styling-agnostisk error boundary | Implementert |
 | `components/ProtectedRoute` | Konfigurerbar med roleCheck callback | Implementert |
+| `context/ToastContext` | ToastProvider + useToast for toast-varsler | Implementert |
 | `lib/queryClient` | Standard QueryClient-config | Implementert |
 | `lib/formatters` | Dato, valuta, tall | Implementert |
 | `analytics/AnalyticsProvider` | Umami-provider med opt-out og dev-mode | Implementert |
