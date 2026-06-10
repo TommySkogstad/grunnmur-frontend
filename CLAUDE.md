@@ -126,3 +126,18 @@ her, så konsumentene har alltid sine egne runtime-versjoner tilgjengelig.
 **Fjern aldri `.dockerignore` uten å varsle alle konsumenter** — fjerning
 gjeninnfører bug-en. Hver konsument har en defensiv `RUN rm -rf` i sine egne
 Dockerfiler som beskyttelse, men det er bedre å holde denne fila intakt.
+
+## `.gitignore` — self-referencing symlink
+
+`.gitignore` inneholder en regel for å ignorere `grunnmur-frontend` (dir-symlink):
+
+```
+# Prevents self-referencing symlink from being accidentally committed (recreated by consumer builds)
+grunnmur-frontend
+```
+
+**Bakgrunn (issue #184):** Konsumentapper som bruker `file:../../grunnmur-frontend` i
+`package.json` setter opp symlinks lokalt under npm install. Dersom en developer
+utgår fra at denne symlinken er del av repoet og committer den, oppstår
+sirkulær referanse ved senere kloning. Regelen sikrer at symlinken aldri
+commites selv om den eksisterer lokalt.
