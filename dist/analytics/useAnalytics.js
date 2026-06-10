@@ -25,7 +25,7 @@ import { useAnalyticsContext } from './analyticsContext';
  *
  * @internal
  */
-export async function hashUserId(userId, salt) {
+async function hashUserId(userId, salt) {
     const effectiveSalt = salt ?? (typeof window !== 'undefined' ? window.location.hostname : '');
     const data = new TextEncoder().encode(`${userId}:${effectiveSalt}`);
     const hash = await crypto.subtle.digest('SHA-256', data);

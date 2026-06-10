@@ -10,8 +10,6 @@
  * Testing: Hvis du trenger fersk formatter-state (f.eks. ved vi.stubGlobal('Intl'...)),
  * bruk vi.resetModules() + dynamisk import for å isolere modulen per test.
  */
-/** Maks antall entries i numberFmtCache — FIFO-purge ved overskridelse */
-export declare const NUMBER_FMT_CACHE_MAX = 10;
 /** Formaterer beløp i NOK: "kr 1 234,50" */
 export declare function formatCurrency(amount: number): string;
 /** Formaterer dato: "08.04.2026" */
