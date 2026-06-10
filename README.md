@@ -511,7 +511,7 @@ export default [
 
 ## Konfigurasjon per app
 
-### summa-summarum (enklest oppsett)
+### Grunnleggende oppsett
 
 ```ts
 const api = createApiClient({

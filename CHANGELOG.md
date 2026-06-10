@@ -91,6 +91,6 @@ Forste stabile release av `@tommyskogstad/frontend-core`.
 
 - TypeScript 5.7+ med strict mode _(bumped til 6.0.3 i [1.0.1])_
 - React 18/19 stotte
-- react-router-dom 6/7 stotte
+- react-router-dom ^7.0 (v6-støtte fjernet i #135)
 - Vitest + Testing Library for tester
 - Publisert til GitHub Packages (privat, `@tommyskogstad` scope)
