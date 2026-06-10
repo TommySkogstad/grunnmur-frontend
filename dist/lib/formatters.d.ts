@@ -18,8 +18,6 @@ export declare function formatCurrency(amount: number): string;
 export declare function formatDate(date: string | Date): string;
 /** Formaterer dato med klokkeslett: "08.04.2026, 14:30" */
 export declare function formatDateTime(date: string | Date): string;
-/** Eksponerer cache-størrelse for testing — ikke bruk i produksjonskode */
-export declare function _numberFmtCacheSize(): number;
 /** Formaterer tall med norsk tusenskilletegn og valgfritt antall desimaler */
 export declare function formatNumber(num: number, decimals?: number): string;
 /** Formaterer filstørrelse: "1,5 KB", "2,3 MB" */

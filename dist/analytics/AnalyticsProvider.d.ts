@@ -33,4 +33,4 @@ export interface AnalyticsProviderProps {
 /**
  * Laster Umami analytics-skriptet og tilgjengeliggjør tracking via kontekst.
  */
-export declare function AnalyticsProvider({ websiteId, scriptSrc, isDev, children }: AnalyticsProviderProps): import("react/jsx-runtime").JSX.Element;
+export declare function AnalyticsProvider({ websiteId, scriptSrc, isDev, children }: AnalyticsProviderProps): import("react").JSX.Element;

@@ -81,10 +81,9 @@ export function createAuthProvider(config) {
             await fetchUser();
         }, [fetchUser]);
         const login = useCallback(async (email, code) => {
-            const response = await authApi.verifyCode(email, code);
-            // Etter vellykket login, hent brukerinfo
-            await fetchUser();
             apiClient.resetUnauthorizedFlag();
+            const response = await authApi.verifyCode(email, code);
+            await fetchUser();
             return response;
         }, [fetchUser]);
         const logout = useCallback(async () => {
