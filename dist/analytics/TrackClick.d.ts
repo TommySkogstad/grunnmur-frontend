@@ -21,4 +21,4 @@ export interface TrackClickProps {
  * Injiserer trackEvent i barnelementets onClick-handler.
  * Er barnelementet ikke et React-element, rendres det uten sporing.
  */
-export declare function TrackClick({ event, data, children }: TrackClickProps): import("react/jsx-runtime").JSX.Element;
+export declare function TrackClick({ event, data, children }: TrackClickProps): import("react").JSX.Element;

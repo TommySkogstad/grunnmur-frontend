@@ -54,10 +54,6 @@ export function formatDateTime(date) {
 }
 // Cache for formatNumber med ulike desimalverdier
 const numberFmtCache = new Map();
-/** Eksponerer cache-størrelse for testing — ikke bruk i produksjonskode */
-export function _numberFmtCacheSize() {
-    return numberFmtCache.size;
-}
 /** Formaterer tall med norsk tusenskilletegn og valgfritt antall desimaler */
 export function formatNumber(num, decimals) {
     if (!isFinite(num))
