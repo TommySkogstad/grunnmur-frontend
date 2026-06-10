@@ -36,12 +36,13 @@ function mockEmptyResponse(status = 204): Response {
 // Test 1: Factory returnerer riktig objekt
 // ============================================================
 describe('createApiClient', () => {
-  it('returnerer objekt med request, formDataRequest, getCsrfToken, setCsrfToken', () => {
+  it('returnerer objekt med request, formDataRequest, blobRequest, getCsrfToken, setCsrfToken', () => {
     const client = createApiClient()
 
     expect(client).toBeDefined()
     expect(typeof client.request).toBe('function')
     expect(typeof client.formDataRequest).toBe('function')
+    expect(typeof client.blobRequest).toBe('function')
     expect(typeof client.getCsrfToken).toBe('function')
     expect(typeof client.setCsrfToken).toBe('function')
     expect(typeof client.resetUnauthorizedFlag).toBe('function')
@@ -514,7 +515,159 @@ describe('retry', () => {
 })
 
 // ============================================================
-// Test 8: formDataRequest
+// Test 8: blobRequest
+// ============================================================
+describe('blobRequest', () => {
+  it('returnerer Blob-instans ved vellykket respons', async () => {
+    const blobContent = 'PDF-innhold her'
+    mockFetch.mockResolvedValueOnce(
+      new Response(blobContent, { status: 200, headers: { 'Content-Type': 'application/pdf' } })
+    )
+
+    const client = createApiClient()
+    const result = await client.blobRequest('/rapport/1.pdf')
+
+    expect(result).toBeInstanceOf(Blob)
+  })
+
+  it('bruker basePath-prefiks', async () => {
+    mockFetch.mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient({ basePath: '/api' })
+    await client.blobRequest('/fil.pdf')
+
+    expect(mockFetch.mock.calls[0][0]).toBe('/api/fil.pdf')
+  })
+
+  it('setter credentials: include', async () => {
+    mockFetch.mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient()
+    await client.blobRequest('/test.pdf')
+
+    const [, init] = mockFetch.mock.calls[0]
+    expect(init.credentials).toBe('include')
+  })
+
+  it('default metode er GET', async () => {
+    mockFetch.mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient()
+    await client.blobRequest('/test.pdf')
+
+    const [, init] = mockFetch.mock.calls[0]
+    expect(init.method).toBe('GET')
+  })
+
+  it('sender IKKE CSRF-header på GET-request', async () => {
+    document.cookie = 'csrf_token=abc123'
+    mockFetch.mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient()
+    await client.blobRequest('/test.pdf')
+
+    const [, init] = mockFetch.mock.calls[0]
+    expect(init.headers['X-CSRF-Token']).toBeUndefined()
+  })
+
+  it('sender CSRF-header på POST-request', async () => {
+    document.cookie = 'csrf_token=blob-csrf'
+    mockFetch.mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient()
+    await client.blobRequest('/generer.pdf', { method: 'POST' })
+
+    const [, init] = mockFetch.mock.calls[0]
+    expect(init.headers['X-CSRF-Token']).toBe('blob-csrf')
+  })
+
+  it('kaller onUnauthorized ved 401-respons', async () => {
+    const onUnauthorized = vi.fn()
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ error: 'Unauthorized' }, 401, 'Unauthorized')
+    )
+
+    const client = createApiClient({ onUnauthorized })
+
+    await expect(client.blobRequest('/sikret.pdf')).rejects.toBeInstanceOf(ApiError)
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+  })
+
+  it('dedupliserer 401-kall på samme måte som request()', async () => {
+    const onUnauthorized = vi.fn()
+    mockFetch.mockResolvedValue(
+      mockResponse({ error: 'Unauthorized' }, 401, 'Unauthorized')
+    )
+
+    const client = createApiClient({ onUnauthorized })
+
+    await Promise.allSettled([
+      client.blobRequest('/a.pdf'),
+      client.blobRequest('/b.pdf'),
+    ])
+
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+  })
+
+  it('retrier GET ved nettverksfeil og lykkes på andre forsøk', async () => {
+    mockFetch
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient({ retryCount: 1, retryDelay: 0 })
+    const result = await client.blobRequest('/test.pdf')
+
+    expect(result).toBeInstanceOf(Blob)
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('retrier ikke POST ved nettverksfeil', async () => {
+    mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+
+    const client = createApiClient({ retryCount: 2, retryDelay: 0 })
+
+    await expect(
+      client.blobRequest('/generer.pdf', { method: 'POST' })
+    ).rejects.toBeInstanceOf(ApiError)
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('kaster ApiError med riktig status ved 404', async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ message: 'Fil ikke funnet' }, 404, 'Not Found')
+    )
+
+    const client = createApiClient()
+
+    try {
+      await client.blobRequest('/mangler.pdf')
+      expect.fail('Skulle ha kastet ApiError')
+    } catch (e) {
+      expect(e).toBeInstanceOf(ApiError)
+      const err = e as ApiError
+      expect(err.status).toBe(404)
+    }
+  })
+
+  it('konverterer nettverksfeil til ApiError med status 0', async () => {
+    mockFetch.mockRejectedValue(new TypeError('Failed to fetch'))
+
+    const client = createApiClient()
+
+    try {
+      await client.blobRequest('/test.pdf')
+      expect.fail('Skulle ha kastet ApiError')
+    } catch (e) {
+      expect(e).toBeInstanceOf(ApiError)
+      const err = e as ApiError
+      expect(err.status).toBe(0)
+      expect(err.statusText).toBe('NetworkError')
+    }
+  })
+})
+
+// ============================================================
+// Test 9: formDataRequest
 // ============================================================
 describe('formDataRequest', () => {
   it('retries ved 503 og lykkes på andre forsøk', async () => {
