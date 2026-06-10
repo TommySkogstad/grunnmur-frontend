@@ -56,7 +56,13 @@ export interface ApiClient {
   blobRequest: (path: string, options?: RequestOptions) => Promise<Blob>
   /** Hent gjeldende CSRF-token */
   getCsrfToken: () => string | null
-  /** Sett CSRF-token manuelt (for memory-mode) */
+  /**
+   * Sett CSRF-token manuelt.
+   *
+   * **Kun effektiv i `csrfSource: 'memory'`-modus.** I cookie-mode er dette en no-op —
+   * token hentes alltid fra cookie, og kallet har ingen virkning.
+   * Logger `console.warn` i dev-miljø ved kall i cookie-mode.
+   */
   setCsrfToken: (token: string) => void
   /** Resett 401-deduplisering (kall etter re-autentisering) */
   resetUnauthorizedFlag: () => void
@@ -140,6 +146,12 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
   }
 
   function setCsrfToken(token: string): void {
+    if (csrfSource !== 'memory' && process.env.NODE_ENV !== 'production') {
+      console.warn(
+        '[ApiClient] setCsrfToken() kallt i cookie-mode — kallet er en no-op. ' +
+        'Bruk csrfSource: "memory" hvis du vil styre token manuelt.'
+      )
+    }
     memoryCsrfToken = token
   }
 

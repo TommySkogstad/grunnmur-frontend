@@ -669,7 +669,33 @@ describe('blobRequest', () => {
 })
 
 // ============================================================
-// Test 9: formDataRequest
+// Test 9: setCsrfToken cookie-mode dev-guard
+// ============================================================
+describe('setCsrfToken cookie-mode dev-guard', () => {
+  it('logger console.warn når setCsrfToken kalles i cookie-mode', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const client = createApiClient() // default: cookie-mode
+    client.setCsrfToken('noe-token')
+
+    expect(warnSpy).toHaveBeenCalledOnce()
+    expect(warnSpy.mock.calls[0][0]).toContain('setCsrfToken')
+    warnSpy.mockRestore()
+  })
+
+  it('logger IKKE console.warn når setCsrfToken kalles i memory-mode', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const client = createApiClient({ csrfSource: 'memory' })
+    client.setCsrfToken('noe-token')
+
+    expect(warnSpy).not.toHaveBeenCalled()
+    warnSpy.mockRestore()
+  })
+})
+
+// ============================================================
+// Test 10: formDataRequest
 // ============================================================
 describe('formDataRequest', () => {
   it('retries ved 503 og lykkes på andre forsøk', async () => {
