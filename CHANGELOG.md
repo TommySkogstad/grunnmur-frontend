@@ -6,13 +6,20 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-06-10
+
+### Lagt til
+- `AnalyticsProvider`: ny valgfri prop `isDev?: boolean` (default `false`) erstatter intern `import.meta.env.DEV`-sjekk og den globale `ImportMeta`-augmenteringen. Konsumentapper bør sende `isDev={import.meta.env.DEV}` for å beholde gjeldende opptreden. Fixes #129.
+
+### Forbedret
+- `AnalyticsProvider`: `isOptedOut()` cachet via lazy `useState` — unngår gjentatte `localStorage`-kall per render. Fixes #111.
+
 ### Fikset
 - `formDataRequest()` retrijer nå kun POST — PUT/PATCH/DELETE retrijes ikke (ikke idempotente). Fixes #110.
 - brace-expansion bumped til 5.0.6 for å patche GHSA-jxxr-4gwj-5jf2. Fixes #116.
 
-### Forbedret
-- `AnalyticsProvider`: `isOptedOut()` cachet via lazy `useState` — unngår gjentatte `localStorage`-kall per render. Fixes #111.
-- `AnalyticsProvider`: ny valgfri prop `isDev?: boolean` (default `false`) erstatter intern `import.meta.env.DEV`-sjekk og den globale `ImportMeta`-augmenteringen. Konsumentapper bør sende `isDev={import.meta.env.DEV}` for å beholde gjeldende opptreden. Fixes #129.
+### Fjernet
+- `_numberFmtCacheSize` er fjernet fra public API (`lib/formatters`). Symbolet var aldri ment som del av det stabile grensesnittet (underscore-prefiks = intern implementasjonsdetalje), men var ved en feiltakelse eksportert. Closes #156.
 
 ## [1.0.2] - 2026-05-20
 
