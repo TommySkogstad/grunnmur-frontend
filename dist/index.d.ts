@@ -17,6 +17,8 @@ export { createProtectedRoute } from './components/ProtectedRoute';
 export type { ProtectedRouteProps } from './components/ProtectedRoute';
 export { createQueryClient } from './query/queryClient';
 export { formatCurrency, formatDate, formatDateTime, formatNumber, formatFileSize, relativeTime } from './lib/formatters';
+export { ToastProvider, useToast } from './context/ToastContext';
+export type { ToastType, ToastContextValue } from './context/ToastContext';
 export { AnalyticsProvider } from './analytics/AnalyticsProvider';
 export type { AnalyticsProviderProps } from './analytics/AnalyticsProvider';
 export { useAnalytics } from './analytics/useAnalytics';
