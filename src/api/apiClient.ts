@@ -52,6 +52,8 @@ export interface ApiClient {
   request: <T>(path: string, options?: RequestOptions) => Promise<T>
   /** FormData-request for filopplasting */
   formDataRequest: <T>(path: string, formData: FormData, method?: string) => Promise<T>
+  /** Blob-request for filnedlasting — returnerer Blob med full CSRF/401-håndtering */
+  blobRequest: (path: string, options?: RequestOptions) => Promise<Blob>
   /** Hent gjeldende CSRF-token */
   getCsrfToken: () => string | null
   /** Sett CSRF-token manuelt (for memory-mode) */
@@ -196,7 +198,8 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
 
   async function fetchWithRetry<T>(
     fn: () => Promise<Response>,
-    maxAttempts: number
+    maxAttempts: number,
+    parser: (response: Response) => Promise<T> = parseResponse
   ): Promise<T> {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       let response: Response
@@ -224,7 +227,7 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
         return handleErrorResponse(response)
       }
 
-      return parseResponse<T>(response)
+      return parser(response)
     }
 
     // Nådd kun hvis maxAttempts er 0 (aldri i praksis siden minimum er 1)
@@ -285,9 +288,29 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
     )
   }
 
+  async function blobRequest(path: string, options?: RequestOptions): Promise<Blob> {
+    const method = (options?.method ?? 'GET').toUpperCase()
+    const headers: Record<string, string> = { ...options?.headers }
+    const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1
+
+    if (!SAFE_METHODS.has(method)) {
+      const token = getCsrfToken()
+      if (token) {
+        headers[csrfHeaderName] = token
+      }
+    }
+
+    return fetchWithRetry<Blob>(
+      () => fetch(`${basePath}${path}`, { method, headers, credentials: 'include' }),
+      maxAttempts,
+      (response) => response.blob()
+    )
+  }
+
   return {
     request,
     formDataRequest,
+    blobRequest,
     getCsrfToken,
     setCsrfToken,
     resetUnauthorizedFlag,
