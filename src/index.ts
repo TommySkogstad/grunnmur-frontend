@@ -37,6 +37,10 @@ export {
   relativeTime
 } from './lib/formatters'
 
+// Context
+export { ToastProvider, useToast } from './context/ToastContext'
+export type { ToastType, ToastContextValue } from './context/ToastContext'
+
 // Analytics
 export { AnalyticsProvider } from './analytics/AnalyticsProvider'
 export type { AnalyticsProviderProps } from './analytics/AnalyticsProvider'
