@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef } from 'react'
+import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
 import type { ReactNode } from 'react'
 
 /** Toast-type for visuell stil og semantikk */
@@ -45,6 +45,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       timerRef.current.delete(id)
     }
     setToasts(prev => prev.filter(t => t.id !== id))
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      timerRef.current.forEach(clearTimeout)
+      timerRef.current.clear()
+    }
   }, [])
 
   return (
