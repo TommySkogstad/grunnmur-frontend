@@ -6,7 +6,6 @@
   "include": ["src"],
   "exclude": [
     "node_modules",
-    "dist",
-    "src/config/__tests__/config-exports.test.ts"
+    "dist"
   ]
 }
