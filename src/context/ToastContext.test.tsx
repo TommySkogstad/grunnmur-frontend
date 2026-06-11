@@ -192,6 +192,33 @@ describe('ToastContext', () => {
     expect(screen.queryByText('Fjern meg')).toBeNull()
   })
 
+  it('removeToast kansellerer auto-dismiss setTimeout', () => {
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
+    let capturedId: number | undefined
+    function CancelTest() {
+      const { showToast, removeToast } = useToast()
+      return (
+        <div>
+          <button onClick={() => { capturedId = showToast('Avbryt meg', 'info') }}>Vis</button>
+          <button onClick={() => { if (capturedId !== undefined) removeToast(capturedId) }}>Avbryt</button>
+        </div>
+      )
+    }
+    renderWithProvider(<CancelTest />)
+    act(() => { fireEvent.click(screen.getByText('Vis')) })
+    act(() => { fireEvent.click(screen.getByText('Avbryt')) })
+
+    expect(clearTimeoutSpy).toHaveBeenCalled()
+
+    // setTimeout skal ikke kjøre etter removeToast
+    const setToastsCalls = vi.fn()
+    act(() => { vi.advanceTimersByTime(8000) })
+    expect(screen.queryByText('Avbryt meg')).toBeNull()
+
+    clearTimeoutSpy.mockRestore()
+    setToastsCalls.mockRestore()
+  })
+
   it('removeToast fjerner kun riktig toast, andre forblir', () => {
     const ids: number[] = []
     function MultiRemove() {
