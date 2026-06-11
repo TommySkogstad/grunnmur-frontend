@@ -704,10 +704,12 @@ import { ErrorBoundary } from '@tommyskogstad/frontend-core'
 ## Utvikling
 
 ```bash
-npm install       # Installer avhengigheter
-npm run build     # Bygg til dist/
-npm test          # Kjor tester
-npm run lint      # ESLint
+npm install              # Installer avhengigheter
+npm run build            # Bygg til dist/
+npm test                 # Kjor tester
+npm run test:watch       # Kjor tester i watch-modus
+npm run typecheck:test   # Type-check test-filer mot tsconfig.test.json
+npm run lint             # ESLint
 ```
 
 ### dist/ må alltid være fresh
