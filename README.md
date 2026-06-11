@@ -300,10 +300,11 @@ import { ToastProvider, useToast } from '@tommyskogstad/frontend-core'
 
 // Bruk i komponenter
 function MyComponent() {
-  const { showToast } = useToast()
+  const { showToast, removeToast } = useToast()
 
   const handleClick = () => {
-    showToast('Operasjonen lyktes!', 'success')
+    const id = showToast('Operasjonen lyktes!', 'success')
+    // Du kan nå bruke id til å avvise toast programmatisk ved behov
   }
 
   return <button onClick={handleClick}>Gjør noe</button>
@@ -314,15 +315,17 @@ function MyComponent() {
 
 | Funksjon | Beskrivelse |
 |----------|-------------|
-| `showToast(message, type)` | Viser en toast-varsling (auto-dismiss etter 4s) |
+| `showToast(message, type, durationMs?)` | Viser en toast-varsling (returnerer toast ID; auto-dismiss etter 4s eller custom duration) |
+| `removeToast(id)` | Fjerner en toast programmatisk ved hjelp av ID |
 
 **Typer:**
 
 - `type: 'success' \| 'error' \| 'info'` — styrer farge og ikon
+- `durationMs?: number` — auto-dismiss varighet i millisekunder (default: 4000)
 
 **Egenskaper:**
 - Fixed positioning (bottom-right)
-- Auto-dismiss etter 4 sekunder
+- Auto-dismiss etter 4 sekunder (konfigurerbar)
 - Lukk-knapp for manuell dismiss
 - Ikoner: ✓ (success), ⚠ (error), ℹ (info)
 - ARIA-live region for skjermlesere
