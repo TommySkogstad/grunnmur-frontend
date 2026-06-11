@@ -12,16 +12,14 @@ describe('TrackClick', () => {
     delete (window as Window & { umami?: unknown }).umami
   })
 
-  it('kaller trackEvent og originalOnClick ved klikk', async () => {
+  it('kaller trackEvent ved klikk via render prop', async () => {
     const mockTrack = vi.fn()
     ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
-
-    const originalClick = vi.fn()
 
     const { getByText } = render(
       <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
         <TrackClick event="btn.klikk" data={{ side: 'hjem' }}>
-          <button onClick={originalClick}>Klikk meg</button>
+          {(onClick) => <button onClick={onClick}>Klikk meg</button>}
         </TrackClick>
       </AnalyticsProvider>
     )
@@ -31,36 +29,30 @@ describe('TrackClick', () => {
     })
 
     expect(mockTrack).toHaveBeenCalledWith('btn.klikk', { side: 'hjem' })
-    expect(originalClick).toHaveBeenCalledOnce()
   })
 
-  it('krasjer ikke når barn ikke har onClick', async () => {
+  it('konsumentens onClick kjøres i tillegg til sporing når konsumenten kjeder den', async () => {
     const mockTrack = vi.fn()
     ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
+
+    const egnKlikk = vi.fn()
 
     const { getByText } = render(
       <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
         <TrackClick event="btn.klikk">
-          <button>Ingen onClick</button>
+          {(track) => (
+            <button onClick={(e) => { track(e); egnKlikk(e) }}>Klikk meg</button>
+          )}
         </TrackClick>
       </AnalyticsProvider>
     )
 
     await act(async () => {
-      getByText('Ingen onClick').click()
+      getByText('Klikk meg').click()
     })
 
     expect(mockTrack).toHaveBeenCalledWith('btn.klikk', undefined)
-  })
-
-  it('rendrer ikke-React-element-barn uten sporing', () => {
-    const { getByText } = render(
-      <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
-        <TrackClick event="test">ren tekst</TrackClick>
-      </AnalyticsProvider>
-    )
-
-    expect(getByText('ren tekst')).toBeDefined()
+    expect(egnKlikk).toHaveBeenCalledOnce()
   })
 
   it('sporer ikke klikk i DEV-modus', async () => {
@@ -70,7 +62,7 @@ describe('TrackClick', () => {
     const { getByText } = render(
       <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js" isDev={true}>
         <TrackClick event="btn.klikk">
-          <button>Klikk</button>
+          {(onClick) => <button onClick={onClick}>Klikk</button>}
         </TrackClick>
       </AnalyticsProvider>
     )
@@ -80,5 +72,24 @@ describe('TrackClick', () => {
     })
 
     expect(mockTrack).not.toHaveBeenCalled()
+  })
+
+  it('sporer uten data når data er utelatt', async () => {
+    const mockTrack = vi.fn()
+    ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
+
+    const { getByText } = render(
+      <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+        <TrackClick event="btn.ingen-data">
+          {(onClick) => <button onClick={onClick}>Klikk</button>}
+        </TrackClick>
+      </AnalyticsProvider>
+    )
+
+    await act(async () => {
+      getByText('Klikk').click()
+    })
+
+    expect(mockTrack).toHaveBeenCalledWith('btn.ingen-data', undefined)
   })
 })
