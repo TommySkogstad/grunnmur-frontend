@@ -38,7 +38,7 @@ describe('usePageView', () => {
 
   it('kaller window.umami.track ved mount med initial pathname', () => {
     const mockTrack = vi.fn()
-    ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
+    ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
 
     render(<TestApp />)
 
@@ -47,7 +47,7 @@ describe('usePageView', () => {
 
   it('kaller window.umami.track på nytt ved navigasjon', async () => {
     const mockTrack = vi.fn()
-    ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
+    ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
 
     const { getByText } = render(<TestApp />)
 
@@ -60,7 +60,7 @@ describe('usePageView', () => {
 
   it('kaller IKKE window.umami.track i DEV-modus', () => {
     const mockTrack = vi.fn()
-    ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
+    ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
 
     render(
       <MemoryRouter initialEntries={['/']}>

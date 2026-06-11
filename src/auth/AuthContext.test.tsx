@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act, waitFor, cleanup } from '@testing-library/react'
 import { createAuthProvider } from './AuthContext'
 import { ApiError } from '../api/apiClient'
+import type { ApiClient } from '../api/apiClient'
 import { createMockApiClient } from '../test/testHelpers'
 
 interface TestUser {

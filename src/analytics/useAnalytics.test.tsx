@@ -47,7 +47,7 @@ describe('useAnalytics', () => {
   it('trackEvent kaller window.umami.track når umami er tilgjengelig', async () => {
 
     const mockTrack = vi.fn()
-    ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
+    ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
 
     const onTrack = vi.fn()
 
@@ -67,7 +67,7 @@ describe('useAnalytics', () => {
   it('trackEvent er no-op utenfor AnalyticsProvider (context-default isEnabled=false)', async () => {
 
     const mockTrack = vi.fn()
-    ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
+    ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
 
     const onTrack = vi.fn()
 
@@ -85,7 +85,7 @@ describe('useAnalytics', () => {
 
   it('trackEvent er no-op i dev-modus (isDev=true)', async () => {
     const mockTrack = vi.fn()
-    ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
+    ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
 
     const onTrack = vi.fn()
 
