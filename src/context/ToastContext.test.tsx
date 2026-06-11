@@ -210,13 +210,10 @@ describe('ToastContext', () => {
 
     expect(clearTimeoutSpy).toHaveBeenCalled()
 
-    // setTimeout skal ikke kjøre etter removeToast
-    const setToastsCalls = vi.fn()
     act(() => { vi.advanceTimersByTime(8000) })
     expect(screen.queryByText('Avbryt meg')).toBeNull()
 
     clearTimeoutSpy.mockRestore()
-    setToastsCalls.mockRestore()
   })
 
   it('removeToast fjerner kun riktig toast, andre forblir', () => {
@@ -257,5 +254,21 @@ describe('ToastContext', () => {
 
     act(() => { vi.advanceTimersByTime(4000) })
     expect(screen.queryByText('Lang toast')).toBeNull()
+  })
+
+  it('alle timers kanselleres ved unmount av ToastProvider', () => {
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
+    function UnmountTest() {
+      const { showToast } = useToast()
+      return <button onClick={() => showToast('Unmount toast', 'info', 5000)}>Vis</button>
+    }
+    const { unmount } = renderWithProvider(<UnmountTest />)
+    act(() => { fireEvent.click(screen.getByText('Vis')) })
+
+    clearTimeoutSpy.mockClear()
+    unmount()
+
+    expect(clearTimeoutSpy).toHaveBeenCalled()
+    clearTimeoutSpy.mockRestore()
   })
 })

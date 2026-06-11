@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 const ToastContext = createContext(null);
 /**
  * Tilbyr toast-varsler til hele komponenttreet.
@@ -26,6 +26,12 @@ export function ToastProvider({ children }) {
             timerRef.current.delete(id);
         }
         setToasts(prev => prev.filter(t => t.id !== id));
+    }, []);
+    useEffect(() => {
+        return () => {
+            timerRef.current.forEach(clearTimeout);
+            timerRef.current.clear();
+        };
     }, []);
     return (_jsxs(ToastContext.Provider, { value: { showToast, removeToast }, children: [children, _jsx(ToastContainer, { toasts: toasts, onRemove: removeToast })] }));
 }
