@@ -3,7 +3,8 @@ import type { ReactNode } from 'react';
 export type ToastType = 'success' | 'error' | 'info';
 /** Verdi eksponert via useToast-hook */
 export interface ToastContextValue {
-    showToast: (message: string, type: ToastType) => void;
+    showToast: (message: string, type: ToastType, durationMs?: number) => number;
+    removeToast: (id: number) => void;
 }
 /**
  * Tilbyr toast-varsler til hele komponenttreet.

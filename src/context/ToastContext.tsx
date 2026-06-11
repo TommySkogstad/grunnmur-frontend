@@ -12,7 +12,8 @@ interface ToastItem {
 
 /** Verdi eksponert via useToast-hook */
 export interface ToastContextValue {
-  showToast: (message: string, type: ToastType) => void
+  showToast: (message: string, type: ToastType, durationMs?: number) => number
+  removeToast: (id: number) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
@@ -25,12 +26,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([])
   const idRef = useRef(0)
 
-  const showToast = useCallback((message: string, type: ToastType) => {
+  const showToast = useCallback((message: string, type: ToastType, durationMs = 4000): number => {
     const id = ++idRef.current
     setToasts(prev => [...prev, { id, message, type }])
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id))
-    }, 4000)
+    }, durationMs)
+    return id
   }, [])
 
   const removeToast = useCallback((id: number) => {
@@ -38,7 +40,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={{ showToast, removeToast }}>
       {children}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>

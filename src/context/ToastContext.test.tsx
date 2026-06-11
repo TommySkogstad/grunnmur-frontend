@@ -159,4 +159,76 @@ describe('ToastContext', () => {
     const { container } = renderWithProvider(<TestComponent />)
     expect(container.querySelector('[aria-live]')).toBeNull()
   })
+
+  it('showToast returnerer en numerisk ID', () => {
+    let toastId: number | undefined
+    function IdCapture() {
+      const { showToast } = useToast()
+      return (
+        <button onClick={() => { toastId = showToast('Test', 'info') }}>Vis</button>
+      )
+    }
+    renderWithProvider(<IdCapture />)
+    act(() => { fireEvent.click(screen.getByText('Vis')) })
+    expect(typeof toastId).toBe('number')
+    expect(toastId).toBeGreaterThan(0)
+  })
+
+  it('removeToast fjerner riktig toast umiddelbart', () => {
+    let capturedId: number | undefined
+    function RemoveTest() {
+      const { showToast, removeToast } = useToast()
+      return (
+        <div>
+          <button onClick={() => { capturedId = showToast('Fjern meg', 'info') }}>Vis</button>
+          <button onClick={() => { if (capturedId !== undefined) removeToast(capturedId) }}>Fjern</button>
+        </div>
+      )
+    }
+    renderWithProvider(<RemoveTest />)
+    act(() => { fireEvent.click(screen.getByText('Vis')) })
+    expect(screen.getByText('Fjern meg')).toBeTruthy()
+    act(() => { fireEvent.click(screen.getByText('Fjern')) })
+    expect(screen.queryByText('Fjern meg')).toBeNull()
+  })
+
+  it('removeToast fjerner kun riktig toast, andre forblir', () => {
+    const ids: number[] = []
+    function MultiRemove() {
+      const { showToast, removeToast } = useToast()
+      return (
+        <div>
+          <button onClick={() => { ids.push(showToast('Toast A', 'info')) }}>Vis A</button>
+          <button onClick={() => { ids.push(showToast('Toast B', 'success')) }}>Vis B</button>
+          <button onClick={() => { if (ids[0] !== undefined) removeToast(ids[0]) }}>Fjern A</button>
+        </div>
+      )
+    }
+    renderWithProvider(<MultiRemove />)
+    act(() => {
+      fireEvent.click(screen.getByText('Vis A'))
+      fireEvent.click(screen.getByText('Vis B'))
+    })
+    act(() => { fireEvent.click(screen.getByText('Fjern A')) })
+    expect(screen.queryByText('Toast A')).toBeNull()
+    expect(screen.getByText('Toast B')).toBeTruthy()
+  })
+
+  it('custom durationMs gir korrekt auto-dismiss-timing', () => {
+    function CustomDuration() {
+      const { showToast } = useToast()
+      return (
+        <button onClick={() => showToast('Lang toast', 'info', 8000)}>Vis lang</button>
+      )
+    }
+    renderWithProvider(<CustomDuration />)
+    act(() => { fireEvent.click(screen.getByText('Vis lang')) })
+    expect(screen.getByText('Lang toast')).toBeTruthy()
+
+    act(() => { vi.advanceTimersByTime(4000) })
+    expect(screen.queryByText('Lang toast')).not.toBeNull()
+
+    act(() => { vi.advanceTimersByTime(4000) })
+    expect(screen.queryByText('Lang toast')).toBeNull()
+  })
 })
