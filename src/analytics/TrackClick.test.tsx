@@ -14,7 +14,7 @@ describe('TrackClick', () => {
 
   it('kaller trackEvent og originalOnClick ved klikk', async () => {
     const mockTrack = vi.fn()
-    ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
+    ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
 
     const originalClick = vi.fn()
 
@@ -36,7 +36,7 @@ describe('TrackClick', () => {
 
   it('krasjer ikke når barn ikke har onClick', async () => {
     const mockTrack = vi.fn()
-    ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
+    ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
 
     const { getByText } = render(
       <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
@@ -65,7 +65,7 @@ describe('TrackClick', () => {
 
   it('sporer ikke klikk i DEV-modus', async () => {
     const mockTrack = vi.fn()
-    ;(window as Window & { umami?: { track: typeof mockTrack } }).umami = { track: mockTrack }
+    ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
 
     const { getByText } = render(
       <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js" isDev={true}>

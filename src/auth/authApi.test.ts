@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createAuthApi } from './authApi'
+import type { ApiClient } from '../api/apiClient'
 import { createMockApiClient } from '../test/testHelpers'
 
 describe('createAuthApi', () => {
