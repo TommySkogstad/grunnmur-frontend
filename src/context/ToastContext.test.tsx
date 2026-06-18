@@ -3,7 +3,8 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act, fireEvent, cleanup } from '@testing-library/react'
-import { ToastProvider, useToast } from './ToastContext'
+import { ToastProvider } from './ToastContext'
+import { useToast } from './toastContext'
 
 function TestComponent() {
   const { showToast } = useToast()

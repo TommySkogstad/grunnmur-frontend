@@ -1,6 +1,6 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
-const ToastContext = createContext(null);
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { ToastContext } from './toastContext';
 /**
  * Tilbyr toast-varsler til hele komponenttreet.
  * Wrap rundt app-roten for å aktivere useToast-hook.
@@ -28,23 +28,13 @@ export function ToastProvider({ children }) {
         setToasts(prev => prev.filter(t => t.id !== id));
     }, []);
     useEffect(() => {
+        const timers = timerRef.current;
         return () => {
-            timerRef.current.forEach(clearTimeout);
-            timerRef.current.clear();
+            timers.forEach(clearTimeout);
+            timers.clear();
         };
     }, []);
     return (_jsxs(ToastContext.Provider, { value: { showToast, removeToast }, children: [children, _jsx(ToastContainer, { toasts: toasts, onRemove: removeToast })] }));
-}
-/**
- * Returnerer showToast-funksjonen for å vise toast-varsler.
- * Må brukes innenfor en ToastProvider.
- */
-export function useToast() {
-    const context = useContext(ToastContext);
-    if (!context) {
-        throw new Error('useToast must be used within a ToastProvider');
-    }
-    return context;
 }
 function ToastContainer({ toasts, onRemove }) {
     if (toasts.length === 0)

@@ -19,7 +19,8 @@ export { createQueryClient } from './query/queryClient';
 // Formatters
 export { formatCurrency, formatDate, formatDateTime, formatNumber, formatFileSize, relativeTime } from './lib/formatters';
 // Context
-export { ToastProvider, useToast } from './context/ToastContext';
+export { ToastProvider } from './context/ToastContext';
+export { useToast } from './context/toastContext';
 // Analytics
 export { AnalyticsProvider } from './analytics/AnalyticsProvider';
 export { useAnalytics } from './analytics/useAnalytics';
