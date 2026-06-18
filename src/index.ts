@@ -38,8 +38,9 @@ export {
 } from './lib/formatters'
 
 // Context
-export { ToastProvider, useToast } from './context/ToastContext'
-export type { ToastType, ToastContextValue } from './context/ToastContext'
+export { ToastProvider } from './context/ToastContext'
+export { useToast } from './context/toastContext'
+export type { ToastType, ToastContextValue } from './context/toastContext'
 
 // Analytics
 export { AnalyticsProvider } from './analytics/AnalyticsProvider'

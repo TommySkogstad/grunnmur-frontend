@@ -1,22 +1,13 @@
-import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import type { ReactNode } from 'react'
-
-/** Toast-type for visuell stil og semantikk */
-export type ToastType = 'success' | 'error' | 'info'
+import { ToastContext } from './toastContext'
+import type { ToastType } from './toastContext'
 
 interface ToastItem {
   id: number
   message: string
   type: ToastType
 }
-
-/** Verdi eksponert via useToast-hook */
-export interface ToastContextValue {
-  showToast: (message: string, type: ToastType, durationMs?: number) => number
-  removeToast: (id: number) => void
-}
-
-const ToastContext = createContext<ToastContextValue | null>(null)
 
 /**
  * Tilbyr toast-varsler til hele komponenttreet.
@@ -48,9 +39,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
+    const timers = timerRef.current
     return () => {
-      timerRef.current.forEach(clearTimeout)
-      timerRef.current.clear()
+      timers.forEach(clearTimeout)
+      timers.clear()
     }
   }, [])
 
@@ -60,18 +52,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>
   )
-}
-
-/**
- * Returnerer showToast-funksjonen for å vise toast-varsler.
- * Må brukes innenfor en ToastProvider.
- */
-export function useToast() {
-  const context = useContext(ToastContext)
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider')
-  }
-  return context
 }
 
 function ToastContainer({ toasts, onRemove }: { toasts: ToastItem[]; onRemove: (id: number) => void }) {
