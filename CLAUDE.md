@@ -74,7 +74,6 @@ npm run lint             # ESLint
 | styreportal | Multi-tenant (TenantContext) |
 | biologportal | React Query, TOTP, Observer-rolle |
 | maskemester | Claude API-integrasjon, strikkekalkulator |
-| vinforalle | Quiz og anbefalinger |
 | smart-casual | Under oppstart |
 
 ## Konvensjoner
