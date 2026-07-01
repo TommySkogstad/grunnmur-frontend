@@ -6,6 +6,11 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-06-11
+
+### Breaking Changes
+- `TrackClick` children-type endret fra `ReactNode` til render prop `(onClick: (e: MouseEvent) => void) => ReactNode`
+
 ## [1.1.0] - 2026-06-10
 
 ### Lagt til
