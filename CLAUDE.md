@@ -37,7 +37,7 @@ npm run lint             # ESLint
 | `components/ErrorBoundary` | Styling-agnostisk error boundary | Implementert |
 | `components/ProtectedRoute` | Konfigurerbar med roleCheck callback | Implementert |
 | `context/ToastContext` | ToastProvider + useToast for toast-varsler | Implementert |
-| `lib/queryClient` | Standard QueryClient-config | Implementert |
+| `query/queryClient` | Standard QueryClient-config | Implementert |
 | `lib/formatters` | Dato, valuta, tall | Implementert |
 | `analytics/AnalyticsProvider` | Umami-provider med opt-out og dev-mode | Implementert |
 | `analytics/useAnalytics` | Hook for manuell event-sporing — returnerer `{ trackEvent, identify, reset }` | Implementert |
