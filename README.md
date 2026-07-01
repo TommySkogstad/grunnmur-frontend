@@ -488,13 +488,20 @@ Returnerer `{ trackEvent, identify, reset }`. Alle funksjoner er no-op dersom tr
 
 ### `TrackClick`
 
-Deklarativ wrapper som sporer klikk på barnelementet.
+Render prop for klikk-sporing.
 
 ```tsx
 import { TrackClick } from '@tommyskogstad/frontend-core'
 
 <TrackClick event="cta.signup" data={{ variant: 'primary' }}>
-  <Button>Registrer deg</Button>
+  {(onClick) => <Button onClick={onClick}>Registrer deg</Button>}
+</TrackClick>
+
+// Med egen klikk-logikk i tillegg:
+<TrackClick event="cta.lagre">
+  {(track) => (
+    <Button onClick={(e) => { track(e); lagre() }}>Lagre</Button>
+  )}
 </TrackClick>
 ```
 
@@ -502,7 +509,7 @@ import { TrackClick } from '@tommyskogstad/frontend-core'
 |------|------|-------------|
 | `event` | `string` | Navn på eventet som spores |
 | `data` | `Record<string, unknown>` | Valgfrie event-data |
-| `children` | `ReactNode` | Barneelement med onClick-handler |
+| `children` | `(onClick: (e: MouseEvent) => void) => ReactNode` | Render prop. Mottar en onClick-handler som sporer eventet. Konsumenten er ansvarlig for å plassere handleren og eventuelt kjede sin egen onClick-logikk. |
 
 Injiserer `trackEvent` i barnelementets `onClick` uten å overskrive eksisterende handler.
 

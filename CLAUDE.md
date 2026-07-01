@@ -41,7 +41,7 @@ npm run lint             # ESLint
 | `lib/formatters` | Dato, valuta, tall | Implementert |
 | `analytics/AnalyticsProvider` | Umami-provider med opt-out og dev-mode | Implementert |
 | `analytics/useAnalytics` | Hook for manuell event-sporing — returnerer `{ trackEvent, identify, reset }` | Implementert |
-| `analytics/TrackClick` | Deklarativ wrapper for klikk-sporing | Implementert |
+| `analytics/TrackClick` | Render prop for klikk-sporing | Implementert |
 | `analytics/usePageView` | Hook for SPA-sidevisnings-sporing | Implementert |
 
 ## Konfigurasjonspunkter
