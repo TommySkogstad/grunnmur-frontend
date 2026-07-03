@@ -49,3 +49,7 @@ export { useAnalytics } from './analytics/useAnalytics'
 export { TrackClick } from './analytics/TrackClick'
 export type { TrackClickProps } from './analytics/TrackClick'
 export { usePageView } from './analytics/usePageView'
+
+// Issue-rapportering
+export { useIssueReport } from './issues/useIssueReport'
+export type { UseIssueReportOptions, UseIssueReportResult, CreateIssueResponse } from './issues/useIssueReport'

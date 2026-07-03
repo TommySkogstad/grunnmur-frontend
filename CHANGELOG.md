@@ -10,6 +10,7 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 - `downloadRequest(path, options?)` — som `blobRequest`, men returnerer `{ blob, filename?, headers }` med filnavn parset fra `Content-Disposition` (RFC 5987 `filename*=UTF-8''...` foretrukket, fallback til vanlig `filename="..."`). Fixes #226.
 - `saveBlob(blob, filename)` — helper som laster ned en Blob i nettleseren via objectURL + `<a download>`-klikk, med automatisk opprydding. Fixes #226.
 - `parseContentDispositionFilename(header)` — eksportert standalone for de som vil parse headeren selv. Fixes #226.
+- `useIssueReport(apiClient, options?)` — headless hook for «rapporter feil»-skjemaer mot grunnmur-backends `POST /issues`. Eier felt-state, FormData-bygging, feltnavn-kontrakt (konsoliderer `consoleLog`/`consoleLogs`-drift til `consoleLogs`, som matcher wire-kontrakten) og klient-side maks-bilder-validering. Eksporterer `CreateIssueResponse`-typen som matcher `GitHubIssueRoutes.kt` 1:1. Fixes #227.
 
 ### Fikset
 - `handleErrorResponse()` leser nå `body.error` som fallback hvis `body.message` mangler — matcher grunnmur-backends `StatusPagesConfig`-kontrakt (`{ error }`). `message` foretrekkes fortsatt hvis begge finnes, for bakoverkompatibilitet. Fixes #225.

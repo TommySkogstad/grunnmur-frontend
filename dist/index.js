@@ -26,3 +26,5 @@ export { AnalyticsProvider } from './analytics/AnalyticsProvider';
 export { useAnalytics } from './analytics/useAnalytics';
 export { TrackClick } from './analytics/TrackClick';
 export { usePageView } from './analytics/usePageView';
+// Issue-rapportering
+export { useIssueReport } from './issues/useIssueReport';

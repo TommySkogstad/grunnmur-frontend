@@ -543,6 +543,52 @@ Kaller `window.umami.track({ url: location.pathname })` ved hver pathname-endrin
 
 ---
 
+### `useIssueReport(apiClient, options?)`
+
+Headless hook for «rapporter feil»-skjemaer mot grunnmur-backends `POST /issues`
+(`GitHubIssueRoutes.kt`). Eier felt-state, FormData-bygging, feltnavn-kontrakt og
+klient-side maks-bilder-validering — UI/styling forblir appens ansvar.
+
+```tsx
+import { useIssueReport } from '@tommyskogstad/frontend-core'
+
+function ReportIssuePage() {
+  const issueReport = useIssueReport(apiClient, { labels: ['brukerrapportert'] })
+
+  if (issueReport.result) {
+    return <p>Takk! Se <a href={issueReport.result.issueUrl}>issue #{issueReport.result.issueNumber}</a></p>
+  }
+
+  return (
+    <form onSubmit={issueReport.submit}>
+      <input required value={issueReport.title} onChange={e => issueReport.setTitle(e.target.value)} />
+      <textarea required value={issueReport.description} onChange={e => issueReport.setDescription(e.target.value)} />
+      <input required value={issueReport.senderName} onChange={e => issueReport.setSenderName(e.target.value)} />
+      <input required type="email" value={issueReport.senderEmail} onChange={e => issueReport.setSenderEmail(e.target.value)} />
+      <textarea value={issueReport.consoleLogs} onChange={e => issueReport.setConsoleLogs(e.target.value)} />
+      <input type="file" multiple accept="image/*" onChange={e => issueReport.handleImageChange(e.target.files)} />
+      {issueReport.imageError && <p>{issueReport.imageError}</p>}
+      {issueReport.error && <p>{issueReport.error}</p>}
+      <button disabled={issueReport.submitting}>{issueReport.submitting ? 'Sender...' : 'Send inn'}</button>
+    </form>
+  )
+}
+```
+
+**`options`:**
+
+| Felt | Type | Default | Beskrivelse |
+|------|------|---------|-------------|
+| `path` | `string` | `'/issues'` | API-sti for issue-endepunktet |
+| `maxImages` | `number` | `3` | Maks antall bilder klient-side — bør matche backendens `maxImagesPerRequest` |
+| `labels` | `string[]` | — | Ekstra GitHub-labels sendt med issuen (kommaseparert i FormData) |
+
+`apiClient` trenger kun `formDataRequest` — en full `ApiClient` fra `createApiClient()` fungerer direkte.
+
+`submit(e?)` kan brukes rett som `onSubmit` (kaller `e.preventDefault()` selv). Den kaster ikke ved feil — feilmeldingen leses fra `error` etterpå. `CreateIssueResponse` (`{ issueNumber, issueUrl, imageUrls }`) matcher backendens DTO 1:1.
+
+---
+
 ### Delt konfigurasjon
 
 Pakken eksporterer ogsa ESLint-config og base tsconfig for konsistent oppsett pa tvers av apper.
