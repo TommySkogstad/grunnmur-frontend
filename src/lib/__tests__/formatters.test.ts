@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
   formatCurrency,
   formatDate,
+  formatDateLong,
   formatDateTime,
   formatNumber,
   formatFileSize,
@@ -59,6 +60,33 @@ describe('formatDate', () => {
 
   it('returnerer tankestrek for undefined', () => {
     expect(formatDate(undefined as unknown as string)).toBe('\u2013')
+  })
+})
+
+describe('formatDateLong', () => {
+  it('formaterer ISO-streng til dag. maaned aar', () => {
+    expect(formatDateLong('2026-01-05')).toBe('5. januar 2026')
+  })
+
+  it('formaterer Date-objekt', () => {
+    const date = new Date(2026, 10, 25) // november = 10 (0-indeksert)
+    expect(formatDateLong(date)).toBe('25. november 2026')
+  })
+
+  it('bruker ikke ledende null paa dagtallet', () => {
+    expect(formatDateLong('2026-04-08')).toBe('8. april 2026')
+  })
+
+  it('returnerer tankestrek for ugyldig dato', () => {
+    expect(formatDateLong('ugyldig')).toBe('–')
+  })
+
+  it('returnerer tankestrek for null', () => {
+    expect(formatDateLong(null as unknown as string)).toBe('–')
+  })
+
+  it('returnerer tankestrek for undefined', () => {
+    expect(formatDateLong(undefined as unknown as string)).toBe('–')
   })
 })
 

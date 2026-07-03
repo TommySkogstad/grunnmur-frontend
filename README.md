@@ -407,6 +407,7 @@ Norske formatters som bruker `nb-NO` locale via Intl API-er.
 import {
   formatCurrency,
   formatDate,
+  formatDateLong,
   formatDateTime,
   formatNumber,
   formatFileSize,
@@ -418,6 +419,7 @@ import {
 |----------|---------------|-----------------|
 | `formatCurrency(amount)` | `1234.5` | `kr 1 234,50` |
 | `formatDate(date)` | `'2026-04-08'` | `08.04.2026` |
+| `formatDateLong(date)` | `'2026-01-05'` | `5. januar 2026` |
 | `formatDateTime(date)` | `'2026-04-08T14:30:00'` | `08.04.2026, 14:30` |
 | `formatNumber(num, decimals?)` | `1234567, 2` | `1 234 567,00` |
 | `formatFileSize(bytes)` | `1536` | `1,5 KB` |

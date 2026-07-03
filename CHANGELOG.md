@@ -14,6 +14,7 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 - `usePageView({ transformUrl? })` — ny valgfri opsjon for å transformere pathname før sending (f.eks. anonymisere ID-er/tokens), fanget via ref slik at en ustabil inline-funksjon ikke trigger track() på hver render. Fixes #228.
 - `anonymizePathname(pathname)` — eksportert helper for `transformUrl`; superset av tall/UUID → `:id` og lange hex-strenger (32/64 tegn, kontrakt-/delingslenke-tokens) → `:token`. Fixes #228.
 - `useAnalyticsIdentity(user, traits?)` og `AnalyticsIdentitySync` (tynn komponent-wrapper) — holder Umami-sesjon synkronisert med innlogget bruker (`identify(user.id, traits)` ved innlogging, `reset()` ved utlogging), med `console.warn` i stedet for kast ved feil. Fixes #228.
+- `formatDateLong(date)` — formaterer dato med lang manedsform: `"5. januar 2026"`. Dekker hullet som fikk 6810 til å redefinere hele formatDate-familien lokalt. Fixes #229.
 
 ### Dokumentert
 - Presisert pageview-semantikk: `usePageView()` kaller Umamis native `track({ url })` (ekte sidevisning), mens `useAnalytics().trackEvent('pageview', {...})` kaller `track(eventName, data)` og registreres som en *custom event* — ikke en sidevisning. README advarer nå eksplisitt mot å bruke `trackEvent` til sidevisninger. Fixes #228.

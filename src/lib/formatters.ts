@@ -17,6 +17,7 @@ const DASH = '–' // tankestrek (–)
 // Lazy-initialiserte Intl-formatters for ytelse
 let currencyFmt: Intl.NumberFormat
 let dateFmt: Intl.DateTimeFormat
+let dateLongFmt: Intl.DateTimeFormat
 let dateTimeFmt: Intl.DateTimeFormat
 let relativeFmt: Intl.RelativeTimeFormat
 
@@ -43,6 +44,14 @@ export function formatDate(date: string | Date): string {
   if (!d) return DASH
   dateFmt ??= new Intl.DateTimeFormat(LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric' })
   return dateFmt.format(d)
+}
+
+/** Formaterer dato med lang manedsform: "5. januar 2026" */
+export function formatDateLong(date: string | Date): string {
+  const d = toDate(date)
+  if (!d) return DASH
+  dateLongFmt ??= new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' })
+  return dateLongFmt.format(d)
 }
 
 /** Formaterer dato med klokkeslett: "08.04.2026, 14:30" */
