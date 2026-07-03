@@ -495,6 +495,11 @@ Returnerer `{ trackEvent, identify, reset }`. Alle funksjoner er no-op dersom tr
 - `identify(userId, attrs?)` — kobler Umami-sesjon til pseudonymisert bruker-ID (hashes lokalt via SHA-256 før sending)
 - `reset()` — tøm session-identifisering ved logout
 
+> **Ikke bruk `trackEvent('pageview', {...})` for sidevisninger.** `trackEvent`
+> kaller `window.umami.track(eventName, data)`, som registreres som en
+> *custom event* i Umami — ikke en ekte sidevisning. Bruk `usePageView()`
+> (under) for sidevisninger; den kaller Umamis native `track({ url })`-API.
+
 ---
 
 ### `TrackClick`
@@ -526,7 +531,7 @@ Injiserer `trackEvent` i barnelementets `onClick` uten å overskrive eksisterend
 
 ---
 
-### `usePageView()`
+### `usePageView(options?)`
 
 Hook for SPA-sidevisnings-sporing med React Router.
 
@@ -539,7 +544,55 @@ function App() {
 }
 ```
 
-Kaller `window.umami.track({ url: location.pathname })` ved hver pathname-endring. Krever at komponenten er innenfor en `react-router-dom` Router. Er no-op dersom tracking er deaktivert.
+Kaller `window.umami.track({ url: location.pathname })` ved hver pathname-endring — dette er Umamis native pageview-API og gir en ekte sidevisning i dashbordet (se advarselen under `useAnalytics()` over). Krever at komponenten er innenfor en `react-router-dom` Router. Er no-op dersom tracking er deaktivert.
+
+**Anonymiser dynamiske ID-er/tokens i stien** med `transformUrl` + den medfølgende `anonymizePathname`-helperen (superset av tall/UUID → `:id` og lange hex-strenger → `:token`):
+
+```tsx
+import { usePageView, anonymizePathname } from '@tommyskogstad/frontend-core'
+
+function App() {
+  usePageView({ transformUrl: anonymizePathname })
+  // '/oppdrag/42' → '/oppdrag/:id', '/kontrakt/<64-tegn-token>' → '/kontrakt/:token'
+  return <Routes>...</Routes>
+}
+```
+
+Trenger appen en snevrere transform (f.eks. kun tall-ID-er), send en egen funksjon i stedet — `transformUrl` tar imot rå pathname og returnerer den transformerte strengen som sendes til Umami.
+
+| Felt | Type | Default | Beskrivelse |
+|------|------|---------|-------------|
+| `transformUrl` | `(pathname: string) => string` | — | Transformer pathname før sending. Fanges via ref internt, så en ny inline-funksjon på hver render trigger IKKE et nytt track()-kall — kun faktiske pathname-endringer gjør det. |
+
+---
+
+### `useAnalyticsIdentity(user, traits?)` / `AnalyticsIdentitySync`
+
+Holder Umami-sesjon synkronisert med innlogget bruker: innlogget → `identify(user.id, traits)`, utlogget (`user` er `null`/`undefined`) → `reset()`. `traits` er fritt formet (typisk `{ rolle }` eller `{ rolle, tenant }`) og sendes uendret videre til `identify()`. Feil fra `identify()` fanges og logges som `console.warn` i stedet for å kaste.
+
+```tsx
+import { useAnalyticsIdentity } from '@tommyskogstad/frontend-core'
+
+function App() {
+  const { user } = useAuth()
+  useAnalyticsIdentity(user, user ? { rolle: user.role } : undefined)
+  return <Routes>...</Routes>
+}
+```
+
+Foretrekker du et mountbart komponent-mønster (samme fasit, tynn wrapper rundt hooken over):
+
+```tsx
+import { AnalyticsIdentitySync } from '@tommyskogstad/frontend-core'
+
+const { user } = useAuth()
+<AnalyticsIdentitySync user={user} traits={{ rolle: user?.role, tenant: tenant?.slug }} />
+```
+
+| Felt | Type | Beskrivelse |
+|------|------|-------------|
+| `user` | `{ id: string \| number } \| null \| undefined` | Kun `id` kreves — resten av feltene sendes via `traits` |
+| `traits` | `Record<string, unknown>` | Ekstra attributter til `identify()` ved innlogging |
 
 ---
 

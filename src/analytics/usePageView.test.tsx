@@ -2,13 +2,20 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
+import { useState } from 'react'
 import { render, act, cleanup } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom'
 import { usePageView } from './usePageView'
+import type { UsePageViewOptions } from './usePageView'
 import { AnalyticsProvider } from './AnalyticsProvider'
 
 function PageViewTracker() {
   usePageView()
+  return null
+}
+
+function PageViewTrackerWithOptions({ options }: { options?: UsePageViewOptions }) {
+  usePageView(options)
   return null
 }
 
@@ -78,5 +85,72 @@ describe('usePageView', () => {
 
   it('krasjer ikke når window.umami er undefined', () => {
     expect(() => render(<TestApp />)).not.toThrow()
+  })
+
+  describe('transformUrl-opsjon', () => {
+    function TestAppWithTransform({ options }: { options?: UsePageViewOptions }) {
+      return (
+        <MemoryRouter initialEntries={['/oppdrag/42']}>
+          <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+            <PageViewTrackerWithOptions options={options} />
+          </AnalyticsProvider>
+        </MemoryRouter>
+      )
+    }
+
+    it('sender rå pathname når transformUrl ikke er satt', () => {
+      const mockTrack = vi.fn()
+      ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
+
+      render(<TestAppWithTransform />)
+
+      expect(mockTrack).toHaveBeenCalledWith({ url: '/oppdrag/42' })
+    })
+
+    it('sender transformert url når transformUrl er satt', () => {
+      const mockTrack = vi.fn()
+      ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
+
+      render(<TestAppWithTransform options={{ transformUrl: () => '/oppdrag/:id' }} />)
+
+      expect(mockTrack).toHaveBeenCalledWith({ url: '/oppdrag/:id' })
+    })
+
+    it('kaller transformUrl med rå pathname som argument', () => {
+      const mockTrack = vi.fn()
+      ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
+      const transformUrl = vi.fn().mockReturnValue('/anonymisert')
+
+      render(<TestAppWithTransform options={{ transformUrl }} />)
+
+      expect(transformUrl).toHaveBeenCalledWith('/oppdrag/42')
+    })
+
+    it('re-rendrer ikke track() på hver render når transformUrl er en ny inline-funksjon', () => {
+      const mockTrack = vi.fn()
+      ;(window as Window & { umami?: { track: typeof mockTrack; identify: () => void } }).umami = { track: mockTrack, identify: vi.fn() }
+
+      function Wrapper() {
+        const [, setTick] = useState(0)
+        return (
+          <MemoryRouter initialEntries={['/oppdrag/42']}>
+            <AnalyticsProvider websiteId="test-id" scriptSrc="https://analytics.example.com/script.js">
+              <PageViewTrackerWithOptions options={{ transformUrl: (p) => p }} />
+              <button onClick={() => setTick((t) => t + 1)}>tick</button>
+            </AnalyticsProvider>
+          </MemoryRouter>
+        )
+      }
+
+      const { getByText } = render(<Wrapper />)
+      expect(mockTrack).toHaveBeenCalledTimes(1)
+
+      act(() => {
+        getByText('tick').click()
+      })
+
+      // Samme pathname, ny transformUrl-referanse ved re-render — skal IKKE spore på nytt
+      expect(mockTrack).toHaveBeenCalledTimes(1)
+    })
   })
 })

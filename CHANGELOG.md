@@ -11,6 +11,12 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 - `saveBlob(blob, filename)` — helper som laster ned en Blob i nettleseren via objectURL + `<a download>`-klikk, med automatisk opprydding. Fixes #226.
 - `parseContentDispositionFilename(header)` — eksportert standalone for de som vil parse headeren selv. Fixes #226.
 - `useIssueReport(apiClient, options?)` — headless hook for «rapporter feil»-skjemaer mot grunnmur-backends `POST /issues`. Eier felt-state, FormData-bygging, feltnavn-kontrakt (konsoliderer `consoleLog`/`consoleLogs`-drift til `consoleLogs`, som matcher wire-kontrakten) og klient-side maks-bilder-validering. Eksporterer `CreateIssueResponse`-typen som matcher `GitHubIssueRoutes.kt` 1:1. Fixes #227.
+- `usePageView({ transformUrl? })` — ny valgfri opsjon for å transformere pathname før sending (f.eks. anonymisere ID-er/tokens), fanget via ref slik at en ustabil inline-funksjon ikke trigger track() på hver render. Fixes #228.
+- `anonymizePathname(pathname)` — eksportert helper for `transformUrl`; superset av tall/UUID → `:id` og lange hex-strenger (32/64 tegn, kontrakt-/delingslenke-tokens) → `:token`. Fixes #228.
+- `useAnalyticsIdentity(user, traits?)` og `AnalyticsIdentitySync` (tynn komponent-wrapper) — holder Umami-sesjon synkronisert med innlogget bruker (`identify(user.id, traits)` ved innlogging, `reset()` ved utlogging), med `console.warn` i stedet for kast ved feil. Fixes #228.
+
+### Dokumentert
+- Presisert pageview-semantikk: `usePageView()` kaller Umamis native `track({ url })` (ekte sidevisning), mens `useAnalytics().trackEvent('pageview', {...})` kaller `track(eventName, data)` og registreres som en *custom event* — ikke en sidevisning. README advarer nå eksplisitt mot å bruke `trackEvent` til sidevisninger. Fixes #228.
 
 ### Fikset
 - `handleErrorResponse()` leser nå `body.error` som fallback hvis `body.message` mangler — matcher grunnmur-backends `StatusPagesConfig`-kontrakt (`{ error }`). `message` foretrekkes fortsatt hvis begge finnes, for bakoverkompatibilitet. Fixes #225.
