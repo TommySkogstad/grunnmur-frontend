@@ -103,6 +103,8 @@ const api = createApiClient({
 |--------|-------------|
 | `request<T>(path, options?)` | JSON-request med automatisk CSRF og retry-logikk |
 | `formDataRequest<T>(path, formData, method?)` | FormData-request for filopplasting med retry-logikk |
+| `blobRequest(path, options?)` | Filnedlasting — returnerer `Blob` med full CSRF/401/retry-håndtering |
+| `downloadRequest(path, options?)` | Som `blobRequest`, men returnerer `{ blob, filename?, headers }` — `filename` parses fra `Content-Disposition` |
 | `getCsrfToken()` | Hent gjeldende CSRF-token |
 | `setCsrfToken(token)` | Sett CSRF-token manuelt (memory-mode) |
 | `resetUnauthorizedFlag()` | Resett 401-deduplisering etter re-autentisering |
@@ -123,6 +125,12 @@ await api.request('/users', {
 const formData = new FormData()
 formData.append('file', file)
 await api.formDataRequest('/upload', formData)
+
+// Filnedlasting med filnavn fra Content-Disposition
+import { saveBlob } from '@tommyskogstad/frontend-core'
+
+const { blob, filename } = await api.downloadRequest('/rapport/1.pdf')
+saveBlob(blob, filename ?? 'rapport.pdf')
 ```
 
 **`ApiError`** — strukturert feilklasse:

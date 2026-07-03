@@ -9,8 +9,8 @@ import pkg from '../package.json'
 export const VERSION = pkg.version
 
 // API-klient
-export { createApiClient, ApiError } from './api/apiClient'
-export type { ApiClientConfig, RequestOptions, ApiClient } from './api/apiClient'
+export { createApiClient, ApiError, saveBlob, parseContentDispositionFilename } from './api/apiClient'
+export type { ApiClientConfig, RequestOptions, ApiClient, DownloadResult } from './api/apiClient'
 
 // Auth
 export { createAuthProvider } from './auth/AuthContext'

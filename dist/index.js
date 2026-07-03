@@ -7,7 +7,7 @@
 import pkg from '../package.json';
 export const VERSION = pkg.version;
 // API-klient
-export { createApiClient, ApiError } from './api/apiClient';
+export { createApiClient, ApiError, saveBlob, parseContentDispositionFilename } from './api/apiClient';
 // Auth
 export { createAuthProvider } from './auth/AuthContext';
 export { createAuthApi } from './auth/authApi';

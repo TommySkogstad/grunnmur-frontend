@@ -2,7 +2,7 @@
  * Konfigurerbar API-klient for Kotlin/Ktor-apper.
  *
  * Håndterer CSRF-tokens (cookie eller in-memory), JSON-serialisering,
- * 401-deduplisering og FormData-opplasting.
+ * 401-deduplisering, FormData-opplasting og blob-nedlasting.
  *
  * @example
  * ```ts
@@ -51,6 +51,46 @@ function getCookieValue(name) {
     const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${escaped}=([^;]*)`));
     return match ? decodeURIComponent(match[1]) : null;
+}
+/**
+ * Parse filnavn fra en Content-Disposition-header.
+ * Foretrekker RFC 5987 `filename*=UTF-8''...` (prosent-enkodet) hvis til
+ * stede — headere kan inneholde begge varianter samtidig, med filename*
+ * som det autoritative feltet. Faller tilbake til vanlig `filename="..."`.
+ * Returnerer undefined hvis header mangler eller ikke inneholder filnavn.
+ */
+export function parseContentDispositionFilename(header) {
+    if (!header)
+        return undefined;
+    const extended = header.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+    if (extended) {
+        try {
+            return decodeURIComponent(extended[1].trim());
+        }
+        catch {
+            return extended[1].trim();
+        }
+    }
+    const simple = header.match(/filename\s*=\s*"?([^";]+)"?/i);
+    return simple ? simple[1].trim() : undefined;
+}
+/**
+ * Last ned en Blob i nettleseren via en midlertidig objectURL + `<a download>`-klikk.
+ * Rydder alltid opp objectURL-en etterpå, selv om klikket kaster.
+ */
+export function saveBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    try {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    }
+    finally {
+        URL.revokeObjectURL(url);
+    }
 }
 /**
  * Opprett en konfigurerbar API-klient.
@@ -164,23 +204,29 @@ export function createApiClient(config) {
         // Nådd kun hvis maxAttempts er 0 (aldri i praksis siden minimum er 1)
         throw new ApiError('Nettverksfeil — sjekk tilkoblingen', 0, 'NetworkError');
     }
-    async function request(path, options) {
-        const method = (options?.method ?? 'GET').toUpperCase();
+    /**
+     * Bygg method/headers/body felles for request(), blobRequest() og downloadRequest():
+     * CSRF-header på muterende metoder + JSON-serialisering av body.
+     */
+    function buildJsonRequestInit(method, options) {
         const headers = { ...options?.headers };
-        const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1;
-        // CSRF-token på muterende requests
         if (!SAFE_METHODS.has(method)) {
             const token = getCsrfToken();
             if (token) {
                 headers[csrfHeaderName] = token;
             }
         }
-        // Content-Type og body-serialisering
         let body;
         if (options?.body !== undefined) {
             headers['Content-Type'] = 'application/json';
             body = JSON.stringify(options.body);
         }
+        return { headers, body };
+    }
+    async function request(path, options) {
+        const method = (options?.method ?? 'GET').toUpperCase();
+        const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1;
+        const { headers, body } = buildJsonRequestInit(method, options);
         return fetchWithRetry(() => fetch(`${basePath}${path}`, { method, headers, body, credentials: 'include' }), maxAttempts);
     }
     async function formDataRequest(path, formData, method = 'POST') {
@@ -203,20 +249,25 @@ export function createApiClient(config) {
     }
     async function blobRequest(path, options) {
         const method = (options?.method ?? 'GET').toUpperCase();
-        const headers = { ...options?.headers };
         const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1;
-        if (!SAFE_METHODS.has(method)) {
-            const token = getCsrfToken();
-            if (token) {
-                headers[csrfHeaderName] = token;
-            }
-        }
-        return fetchWithRetry(() => fetch(`${basePath}${path}`, { method, headers, credentials: 'include' }), maxAttempts, (response) => response.blob());
+        const { headers, body } = buildJsonRequestInit(method, options);
+        return fetchWithRetry(() => fetch(`${basePath}${path}`, { method, headers, body, credentials: 'include' }), maxAttempts, (response) => response.blob());
+    }
+    async function downloadRequest(path, options) {
+        const method = (options?.method ?? 'GET').toUpperCase();
+        const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1;
+        const { headers, body } = buildJsonRequestInit(method, options);
+        return fetchWithRetry(() => fetch(`${basePath}${path}`, { method, headers, body, credentials: 'include' }), maxAttempts, async (response) => ({
+            blob: await response.blob(),
+            filename: parseContentDispositionFilename(response.headers.get('Content-Disposition')),
+            headers: response.headers,
+        }));
     }
     return {
         request,
         formDataRequest,
         blobRequest,
+        downloadRequest,
         getCsrfToken,
         setCsrfToken,
         resetUnauthorizedFlag,

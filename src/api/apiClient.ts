@@ -2,7 +2,7 @@
  * Konfigurerbar API-klient for Kotlin/Ktor-apper.
  *
  * Håndterer CSRF-tokens (cookie eller in-memory), JSON-serialisering,
- * 401-deduplisering og FormData-opplasting.
+ * 401-deduplisering, FormData-opplasting og blob-nedlasting.
  *
  * @example
  * ```ts
@@ -46,6 +46,16 @@ export interface RequestOptions {
   headers?: Record<string, string>
 }
 
+/** Resultat av downloadRequest() — Blob med filnavn utledet fra Content-Disposition */
+export interface DownloadResult {
+  /** Nedlastet innhold */
+  blob: Blob
+  /** Filnavn parset fra Content-Disposition (RFC 5987 filename* foretrukket), eller undefined hvis header mangler */
+  filename?: string
+  /** Rå respons-headers, for tilfeller filename ikke dekker */
+  headers: Headers
+}
+
 /** API-klient returnert av createApiClient() */
 export interface ApiClient {
   /** Generisk request med JSON-serialisering */
@@ -54,6 +64,8 @@ export interface ApiClient {
   formDataRequest: <T>(path: string, formData: FormData, method?: string) => Promise<T>
   /** Blob-request for filnedlasting — returnerer Blob med full CSRF/401-håndtering */
   blobRequest: (path: string, options?: RequestOptions) => Promise<Blob>
+  /** Som blobRequest, men inkluderer filnavn parset fra Content-Disposition */
+  downloadRequest: (path: string, options?: RequestOptions) => Promise<DownloadResult>
   /** Hent gjeldende CSRF-token */
   getCsrfToken: () => string | null
   /**
@@ -115,6 +127,47 @@ function getCookieValue(name: string): string | null {
     new RegExp(`(?:^|;\\s*)${escaped}=([^;]*)`)
   )
   return match ? decodeURIComponent(match[1]) : null
+}
+
+/**
+ * Parse filnavn fra en Content-Disposition-header.
+ * Foretrekker RFC 5987 `filename*=UTF-8''...` (prosent-enkodet) hvis til
+ * stede — headere kan inneholde begge varianter samtidig, med filename*
+ * som det autoritative feltet. Faller tilbake til vanlig `filename="..."`.
+ * Returnerer undefined hvis header mangler eller ikke inneholder filnavn.
+ */
+export function parseContentDispositionFilename(header: string | null): string | undefined {
+  if (!header) return undefined
+
+  const extended = header.match(/filename\*\s*=\s*UTF-8''([^;]+)/i)
+  if (extended) {
+    try {
+      return decodeURIComponent(extended[1].trim())
+    } catch {
+      return extended[1].trim()
+    }
+  }
+
+  const simple = header.match(/filename\s*=\s*"?([^";]+)"?/i)
+  return simple ? simple[1].trim() : undefined
+}
+
+/**
+ * Last ned en Blob i nettleseren via en midlertidig objectURL + `<a download>`-klikk.
+ * Rydder alltid opp objectURL-en etterpå, selv om klikket kaster.
+ */
+export function saveBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob)
+  try {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+  } finally {
+    URL.revokeObjectURL(url)
+  }
 }
 
 /**
@@ -255,12 +308,16 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
     throw new ApiError('Nettverksfeil — sjekk tilkoblingen', 0, 'NetworkError')
   }
 
-  async function request<T>(path: string, options?: RequestOptions): Promise<T> {
-    const method = (options?.method ?? 'GET').toUpperCase()
+  /**
+   * Bygg method/headers/body felles for request(), blobRequest() og downloadRequest():
+   * CSRF-header på muterende metoder + JSON-serialisering av body.
+   */
+  function buildJsonRequestInit(
+    method: string,
+    options?: RequestOptions
+  ): { headers: Record<string, string>; body?: string } {
     const headers: Record<string, string> = { ...options?.headers }
-    const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1
 
-    // CSRF-token på muterende requests
     if (!SAFE_METHODS.has(method)) {
       const token = getCsrfToken()
       if (token) {
@@ -268,12 +325,19 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
       }
     }
 
-    // Content-Type og body-serialisering
     let body: string | undefined
     if (options?.body !== undefined) {
       headers['Content-Type'] = 'application/json'
       body = JSON.stringify(options.body)
     }
+
+    return { headers, body }
+  }
+
+  async function request<T>(path: string, options?: RequestOptions): Promise<T> {
+    const method = (options?.method ?? 'GET').toUpperCase()
+    const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1
+    const { headers, body } = buildJsonRequestInit(method, options)
 
     return fetchWithRetry<T>(
       () => fetch(`${basePath}${path}`, { method, headers, body, credentials: 'include' }),
@@ -311,20 +375,29 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
 
   async function blobRequest(path: string, options?: RequestOptions): Promise<Blob> {
     const method = (options?.method ?? 'GET').toUpperCase()
-    const headers: Record<string, string> = { ...options?.headers }
     const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1
-
-    if (!SAFE_METHODS.has(method)) {
-      const token = getCsrfToken()
-      if (token) {
-        headers[csrfHeaderName] = token
-      }
-    }
+    const { headers, body } = buildJsonRequestInit(method, options)
 
     return fetchWithRetry<Blob>(
-      () => fetch(`${basePath}${path}`, { method, headers, credentials: 'include' }),
+      () => fetch(`${basePath}${path}`, { method, headers, body, credentials: 'include' }),
       maxAttempts,
       (response) => response.blob()
+    )
+  }
+
+  async function downloadRequest(path: string, options?: RequestOptions): Promise<DownloadResult> {
+    const method = (options?.method ?? 'GET').toUpperCase()
+    const maxAttempts = SAFE_METHODS.has(method) ? 1 + retryCount : 1
+    const { headers, body } = buildJsonRequestInit(method, options)
+
+    return fetchWithRetry<DownloadResult>(
+      () => fetch(`${basePath}${path}`, { method, headers, body, credentials: 'include' }),
+      maxAttempts,
+      async (response) => ({
+        blob: await response.blob(),
+        filename: parseContentDispositionFilename(response.headers.get('Content-Disposition')),
+        headers: response.headers,
+      })
     )
   }
 
@@ -332,6 +405,7 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
     request,
     formDataRequest,
     blobRequest,
+    downloadRequest,
     getCsrfToken,
     setCsrfToken,
     resetUnauthorizedFlag,

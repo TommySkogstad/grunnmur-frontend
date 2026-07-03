@@ -2,7 +2,7 @@
  * Konfigurerbar API-klient for Kotlin/Ktor-apper.
  *
  * Håndterer CSRF-tokens (cookie eller in-memory), JSON-serialisering,
- * 401-deduplisering og FormData-opplasting.
+ * 401-deduplisering, FormData-opplasting og blob-nedlasting.
  *
  * @example
  * ```ts
@@ -43,6 +43,15 @@ export interface RequestOptions {
     /** Ekstra headers */
     headers?: Record<string, string>;
 }
+/** Resultat av downloadRequest() — Blob med filnavn utledet fra Content-Disposition */
+export interface DownloadResult {
+    /** Nedlastet innhold */
+    blob: Blob;
+    /** Filnavn parset fra Content-Disposition (RFC 5987 filename* foretrukket), eller undefined hvis header mangler */
+    filename?: string;
+    /** Rå respons-headers, for tilfeller filename ikke dekker */
+    headers: Headers;
+}
 /** API-klient returnert av createApiClient() */
 export interface ApiClient {
     /** Generisk request med JSON-serialisering */
@@ -51,6 +60,8 @@ export interface ApiClient {
     formDataRequest: <T>(path: string, formData: FormData, method?: string) => Promise<T>;
     /** Blob-request for filnedlasting — returnerer Blob med full CSRF/401-håndtering */
     blobRequest: (path: string, options?: RequestOptions) => Promise<Blob>;
+    /** Som blobRequest, men inkluderer filnavn parset fra Content-Disposition */
+    downloadRequest: (path: string, options?: RequestOptions) => Promise<DownloadResult>;
     /** Hent gjeldende CSRF-token */
     getCsrfToken: () => string | null;
     /**
@@ -74,6 +85,19 @@ export declare class ApiError extends Error {
     /** Sjekk om feilen er en spesifikk HTTP-statuskode */
     is(status: number): boolean;
 }
+/**
+ * Parse filnavn fra en Content-Disposition-header.
+ * Foretrekker RFC 5987 `filename*=UTF-8''...` (prosent-enkodet) hvis til
+ * stede — headere kan inneholde begge varianter samtidig, med filename*
+ * som det autoritative feltet. Faller tilbake til vanlig `filename="..."`.
+ * Returnerer undefined hvis header mangler eller ikke inneholder filnavn.
+ */
+export declare function parseContentDispositionFilename(header: string | null): string | undefined;
+/**
+ * Last ned en Blob i nettleseren via en midlertidig objectURL + `<a download>`-klikk.
+ * Rydder alltid opp objectURL-en etterpå, selv om klikket kaster.
+ */
+export declare function saveBlob(blob: Blob, filename: string): void;
 /**
  * Opprett en konfigurerbar API-klient.
  *
