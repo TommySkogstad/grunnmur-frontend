@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { createApiClient, ApiError } from './apiClient'
+import { createApiClient, ApiError, parseContentDispositionFilename, saveBlob } from './apiClient'
 import type { ApiClient, ApiClientConfig } from './apiClient'
 
 // Mock fetch globalt
@@ -697,6 +697,183 @@ describe('blobRequest', () => {
       expect(err.status).toBe(0)
       expect(err.statusText).toBe('NetworkError')
     }
+  })
+
+  it('serialiserer og sender options.body som JSON (tidligere ble body stille droppet)', async () => {
+    mockFetch.mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient()
+    await client.blobRequest('/rapport', { method: 'POST', body: { filter: 'aktive' } })
+
+    const [, init] = mockFetch.mock.calls[0]
+    expect(init.body).toBe(JSON.stringify({ filter: 'aktive' }))
+    expect(init.headers['Content-Type']).toBe('application/json')
+  })
+
+  it('sender ikke body-relaterte headers når options.body er utelatt', async () => {
+    mockFetch.mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient()
+    await client.blobRequest('/test.pdf', { method: 'POST' })
+
+    const [, init] = mockFetch.mock.calls[0]
+    expect(init.body).toBeUndefined()
+    expect(init.headers['Content-Type']).toBeUndefined()
+  })
+})
+
+// ============================================================
+// Test 11: downloadRequest
+// ============================================================
+describe('downloadRequest', () => {
+  it('returnerer blob, filename og headers ved vellykket respons', async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response('PDF-innhold', {
+        status: 200,
+        headers: { 'Content-Disposition': 'attachment; filename="rapport.pdf"' },
+      })
+    )
+
+    const client = createApiClient()
+    const result = await client.downloadRequest('/rapport/1.pdf')
+
+    expect(result.blob.constructor.name).toBe('Blob')
+    expect(result.filename).toBe('rapport.pdf')
+    expect(result.headers.get('Content-Disposition')).toContain('rapport.pdf')
+  })
+
+  it('foretrekker RFC 5987 filename* (UTF-8-enkodet)', async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response('data', {
+        status: 200,
+        headers: {
+          'Content-Disposition': "attachment; filename=\"kontrakt.pdf\"; filename*=UTF-8''kontrakt-m%C3%B8te.pdf",
+        },
+      })
+    )
+
+    const client = createApiClient()
+    const result = await client.downloadRequest('/kontrakt.pdf')
+
+    expect(result.filename).toBe('kontrakt-møte.pdf')
+  })
+
+  it('filename er undefined hvis Content-Disposition mangler', async () => {
+    mockFetch.mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient()
+    const result = await client.downloadRequest('/uten-header.pdf')
+
+    expect(result.filename).toBeUndefined()
+  })
+
+  it('serialiserer og sender options.body som JSON', async () => {
+    mockFetch.mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient()
+    await client.downloadRequest('/generer.pdf', { method: 'POST', body: { id: 42 } })
+
+    const [, init] = mockFetch.mock.calls[0]
+    expect(init.body).toBe(JSON.stringify({ id: 42 }))
+    expect(init.headers['Content-Type']).toBe('application/json')
+  })
+
+  it('sender CSRF-header på muterende metoder', async () => {
+    document.cookie = 'csrf_token=download-csrf'
+    mockFetch.mockResolvedValueOnce(new Response('data', { status: 200 }))
+
+    const client = createApiClient()
+    await client.downloadRequest('/generer.pdf', { method: 'POST' })
+
+    const [, init] = mockFetch.mock.calls[0]
+    expect(init.headers['X-CSRF-Token']).toBe('download-csrf')
+  })
+
+  it('kaster ApiError ved feilrespons', async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ error: 'Fil ikke funnet' }, 404, 'Not Found')
+    )
+
+    const client = createApiClient()
+
+    await expect(client.downloadRequest('/mangler.pdf')).rejects.toBeInstanceOf(ApiError)
+  })
+})
+
+// ============================================================
+// Test 12: parseContentDispositionFilename
+// ============================================================
+describe('parseContentDispositionFilename', () => {
+  it('parser vanlig filename="..."', () => {
+    expect(parseContentDispositionFilename('attachment; filename="rapport.pdf"')).toBe('rapport.pdf')
+  })
+
+  it('parser filename uten anførselstegn', () => {
+    expect(parseContentDispositionFilename('attachment; filename=rapport.pdf')).toBe('rapport.pdf')
+  })
+
+  it('parser RFC 5987 filename*=UTF-8\'\'... og dekoder prosent-enkoding', () => {
+    expect(
+      parseContentDispositionFilename("attachment; filename*=UTF-8''kontrakt-m%C3%B8te.pdf")
+    ).toBe('kontrakt-møte.pdf')
+  })
+
+  it('returnerer undefined for null-header', () => {
+    expect(parseContentDispositionFilename(null)).toBeUndefined()
+  })
+
+  it('returnerer undefined hvis header ikke inneholder filename', () => {
+    expect(parseContentDispositionFilename('inline')).toBeUndefined()
+  })
+})
+
+// ============================================================
+// Test 13: saveBlob
+// ============================================================
+describe('saveBlob', () => {
+  it('oppretter objectURL, klikker en <a download> og rydder opp URL-en etterpå', () => {
+    const createObjectURL = vi.fn().mockReturnValue('blob:mock-url')
+    const revokeObjectURL = vi.fn()
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
+
+    const clickSpy = vi.fn()
+    const originalCreateElement = document.createElement.bind(document)
+    const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+      const el = originalCreateElement(tag)
+      if (tag === 'a') el.click = clickSpy
+      return el
+    })
+
+    const blob = new Blob(['data'])
+    saveBlob(blob, 'test.pdf')
+
+    expect(createObjectURL).toHaveBeenCalledWith(blob)
+    expect(clickSpy).toHaveBeenCalledTimes(1)
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
+
+    createElementSpy.mockRestore()
+  })
+
+  it('rydder opp objectURL selv om klikket kaster', () => {
+    const createObjectURL = vi.fn().mockReturnValue('blob:mock-url')
+    const revokeObjectURL = vi.fn()
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
+
+    const originalCreateElement = document.createElement.bind(document)
+    const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+      const el = originalCreateElement(tag)
+      if (tag === 'a') {
+        el.click = () => {
+          throw new Error('klikk-feil')
+        }
+      }
+      return el
+    })
+
+    expect(() => saveBlob(new Blob(['data']), 'test.pdf')).toThrow('klikk-feil')
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
+
+    createElementSpy.mockRestore()
   })
 })
 

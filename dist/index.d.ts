@@ -5,8 +5,8 @@
  * @see README.md for API-referanse og konfigurasjon
  */
 export declare const VERSION: string;
-export { createApiClient, ApiError } from './api/apiClient';
-export type { ApiClientConfig, RequestOptions, ApiClient } from './api/apiClient';
+export { createApiClient, ApiError, saveBlob, parseContentDispositionFilename } from './api/apiClient';
+export type { ApiClientConfig, RequestOptions, ApiClient, DownloadResult } from './api/apiClient';
 export { createAuthProvider } from './auth/AuthContext';
 export type { AuthContextValue, AuthProviderConfig } from './auth/AuthContext';
 export { createAuthApi } from './auth/authApi';

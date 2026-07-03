@@ -6,8 +6,14 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Lagt til
+- `downloadRequest(path, options?)` — som `blobRequest`, men returnerer `{ blob, filename?, headers }` med filnavn parset fra `Content-Disposition` (RFC 5987 `filename*=UTF-8''...` foretrukket, fallback til vanlig `filename="..."`). Fixes #226.
+- `saveBlob(blob, filename)` — helper som laster ned en Blob i nettleseren via objectURL + `<a download>`-klikk, med automatisk opprydding. Fixes #226.
+- `parseContentDispositionFilename(header)` — eksportert standalone for de som vil parse headeren selv. Fixes #226.
+
 ### Fikset
 - `handleErrorResponse()` leser nå `body.error` som fallback hvis `body.message` mangler — matcher grunnmur-backends `StatusPagesConfig`-kontrakt (`{ error }`). `message` foretrekkes fortsatt hvis begge finnes, for bakoverkompatibilitet. Fixes #225.
+- `blobRequest()` serialiserte tidligere `options.body` til intet — muterende blob-requests med body ble sendt uten innhold. Deler nå body/CSRF-bygging med `request()` via ny intern `buildJsonRequestInit()`. Fixes #226.
 
 ## [2.0.0] - 2026-06-11
 
