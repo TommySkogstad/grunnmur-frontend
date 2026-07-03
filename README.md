@@ -142,6 +142,9 @@ try {
 }
 ```
 
+`error.message` leses fra `body.message`, med fallback til `body.error` —
+grunnmur-backends `StatusPagesConfig` sender `{ error }`, ikke `{ message }`.
+
 ---
 
 ### `createAuthProvider<TUser>(config)`

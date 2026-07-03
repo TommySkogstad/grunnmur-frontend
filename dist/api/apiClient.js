@@ -89,6 +89,9 @@ export function createApiClient(config) {
     }
     /**
      * Håndter feilresponser. Kaster ApiError med parsed body.
+     *
+     * Feilmelding leses fra body.message, med fallback til body.error
+     * (grunnmur-backends StatusPagesConfig sender { error }).
      */
     async function handleErrorResponse(response) {
         let body;
@@ -97,8 +100,14 @@ export function createApiClient(config) {
             const text = await response.text();
             if (text) {
                 body = JSON.parse(text);
+                // grunnmur-backends StatusPagesConfig sender { error }, ikke { message }.
+                // message foretrekkes for bakoverkompatibilitet med apper som allerede
+                // sender det feltet.
                 if (typeof body?.message === 'string') {
                     message = body.message;
+                }
+                else if (typeof body?.error === 'string') {
+                    message = body.error;
                 }
             }
         }

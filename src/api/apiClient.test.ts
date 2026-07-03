@@ -433,6 +433,38 @@ describe('ApiError', () => {
     }
   })
 
+  it('faller tilbake til body.error hvis body ikke har message-felt (grunnmur-backend-kontrakt)', async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ error: 'Ugyldig e-post' }, 400, 'Bad Request')
+    )
+
+    const client = createApiClient()
+
+    try {
+      await client.request('/register')
+      expect.fail('Skulle ha kastet ApiError')
+    } catch (e) {
+      const err = e as ApiError
+      expect(err.message).toBe('Ugyldig e-post')
+    }
+  })
+
+  it('foretrekker body.message over body.error hvis begge finnes', async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ message: 'Fra message', error: 'Fra error' }, 400, 'Bad Request')
+    )
+
+    const client = createApiClient()
+
+    try {
+      await client.request('/test')
+      expect.fail('Skulle ha kastet ApiError')
+    } catch (e) {
+      const err = e as ApiError
+      expect(err.message).toBe('Fra message')
+    }
+  })
+
   it('har is()-metode for statussjekk', () => {
     const err = new ApiError('test', 429, 'Too Many Requests')
     expect(err.is(429)).toBe(true)

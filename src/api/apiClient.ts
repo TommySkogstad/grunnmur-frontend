@@ -162,6 +162,9 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
 
   /**
    * Håndter feilresponser. Kaster ApiError med parsed body.
+   *
+   * Feilmelding leses fra body.message, med fallback til body.error
+   * (grunnmur-backends StatusPagesConfig sender { error }).
    */
   async function handleErrorResponse(response: Response): Promise<never> {
     let body: Record<string, unknown> | undefined
@@ -171,8 +174,13 @@ export function createApiClient(config?: ApiClientConfig): ApiClient {
       const text = await response.text()
       if (text) {
         body = JSON.parse(text) as Record<string, unknown>
+        // grunnmur-backends StatusPagesConfig sender { error }, ikke { message }.
+        // message foretrekkes for bakoverkompatibilitet med apper som allerede
+        // sender det feltet.
         if (typeof body?.message === 'string') {
           message = body.message
+        } else if (typeof body?.error === 'string') {
+          message = body.error
         }
       }
     } catch {
