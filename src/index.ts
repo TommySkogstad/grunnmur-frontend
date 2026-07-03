@@ -31,6 +31,7 @@ export { createQueryClient } from './query/queryClient'
 export {
   formatCurrency,
   formatDate,
+  formatDateLong,
   formatDateTime,
   formatNumber,
   formatFileSize,

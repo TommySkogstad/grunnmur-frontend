@@ -17,7 +17,7 @@ export { createProtectedRoute } from './components/ProtectedRoute';
 // Query
 export { createQueryClient } from './query/queryClient';
 // Formatters
-export { formatCurrency, formatDate, formatDateTime, formatNumber, formatFileSize, relativeTime } from './lib/formatters';
+export { formatCurrency, formatDate, formatDateLong, formatDateTime, formatNumber, formatFileSize, relativeTime } from './lib/formatters';
 // Context
 export { ToastProvider } from './context/ToastContext';
 export { useToast } from './context/toastContext';

@@ -14,6 +14,8 @@
 export declare function formatCurrency(amount: number): string;
 /** Formaterer dato: "08.04.2026" */
 export declare function formatDate(date: string | Date): string;
+/** Formaterer dato med lang manedsform: "5. januar 2026" */
+export declare function formatDateLong(date: string | Date): string;
 /** Formaterer dato med klokkeslett: "08.04.2026, 14:30" */
 export declare function formatDateTime(date: string | Date): string;
 /** Formaterer tall med norsk tusenskilletegn og valgfritt antall desimaler */

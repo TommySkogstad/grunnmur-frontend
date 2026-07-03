@@ -15,6 +15,7 @@ const DASH = '–'; // tankestrek (–)
 // Lazy-initialiserte Intl-formatters for ytelse
 let currencyFmt;
 let dateFmt;
+let dateLongFmt;
 let dateTimeFmt;
 let relativeFmt;
 /** Maks antall entries i numberFmtCache — FIFO-purge ved overskridelse */
@@ -40,6 +41,14 @@ export function formatDate(date) {
         return DASH;
     dateFmt ?? (dateFmt = new Intl.DateTimeFormat(LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric' }));
     return dateFmt.format(d);
+}
+/** Formaterer dato med lang manedsform: "5. januar 2026" */
+export function formatDateLong(date) {
+    const d = toDate(date);
+    if (!d)
+        return DASH;
+    dateLongFmt ?? (dateLongFmt = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' }));
+    return dateLongFmt.format(d);
 }
 /** Formaterer dato med klokkeslett: "08.04.2026, 14:30" */
 export function formatDateTime(date) {

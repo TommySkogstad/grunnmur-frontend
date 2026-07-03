@@ -16,7 +16,7 @@ export type { ErrorBoundaryProps } from './components/ErrorBoundary';
 export { createProtectedRoute } from './components/ProtectedRoute';
 export type { ProtectedRouteProps } from './components/ProtectedRoute';
 export { createQueryClient } from './query/queryClient';
-export { formatCurrency, formatDate, formatDateTime, formatNumber, formatFileSize, relativeTime } from './lib/formatters';
+export { formatCurrency, formatDate, formatDateLong, formatDateTime, formatNumber, formatFileSize, relativeTime } from './lib/formatters';
 export { ToastProvider } from './context/ToastContext';
 export { useToast } from './context/toastContext';
 export type { ToastType, ToastContextValue } from './context/toastContext';
