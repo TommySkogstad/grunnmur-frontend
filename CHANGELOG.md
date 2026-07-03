@@ -6,6 +6,9 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fikset
+- `handleErrorResponse()` leser nå `body.error` som fallback hvis `body.message` mangler — matcher grunnmur-backends `StatusPagesConfig`-kontrakt (`{ error }`). `message` foretrekkes fortsatt hvis begge finnes, for bakoverkompatibilitet. Fixes #225.
+
 ## [2.0.0] - 2026-06-11
 
 ### Breaking Changes
