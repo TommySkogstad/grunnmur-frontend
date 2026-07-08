@@ -43,6 +43,10 @@ npm run lint             # ESLint
 | `analytics/useAnalytics` | Hook for manuell event-sporing — returnerer `{ trackEvent, identify, reset }` | Implementert |
 | `analytics/TrackClick` | Render prop for klikk-sporing | Implementert |
 | `analytics/usePageView` | Hook for SPA-sidevisnings-sporing | Implementert |
+| `analytics/useAnalyticsIdentity` | Synker Umami-sesjon med innlogget bruker (identify/reset) | Implementert |
+| `analytics/AnalyticsIdentitySync` | Mountbar wrapper rundt useAnalyticsIdentity | Implementert |
+| `analytics/anonymizePathname` | Helper for å anonymisere ID-er/tokens i `usePageView({ transformUrl })` | Implementert |
+| `issues/useIssueReport` | Headless hook for rapporter-feil-skjemaer mot backendens `POST /issues` | Implementert |
 
 ## Konfigurasjonspunkter
 
