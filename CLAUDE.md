@@ -79,6 +79,7 @@ npm run lint             # ESLint
 | biologportal | React Query, TOTP, Observer-rolle |
 | maskemester | Claude API-integrasjon, strikkekalkulator |
 | smart-casual | Under oppstart |
+| vinforalle | Under oppstart |
 
 ## Konvensjoner
 
