@@ -32,13 +32,16 @@ npm run lint             # ESLint
 | Modul | Beskrivelse | Status |
 |-------|-------------|--------|
 | `api/apiClient` | Konfigurerbar fetch-wrapper med CSRF | Implementert |
+| `api/downloadRequest` | Laster ned Blob fra backend med automatisk filnavn-parsing fra Content-Disposition | Implementert |
+| `api/saveBlob` | Helper for å laste ned Blob i nettleseren via objectURL | Implementert |
+| `api/parseContentDispositionFilename` | Parser filnavn fra Content-Disposition-header (RFC 5987) | Implementert |
 | `auth/AuthContext` | Generisk AuthProvider med hooks | Implementert |
 | `auth/authApi` | requestCode, verifyCode, getMe, getSession, logout | Implementert |
 | `components/ErrorBoundary` | Styling-agnostisk error boundary | Implementert |
 | `components/ProtectedRoute` | Konfigurerbar med roleCheck callback | Implementert |
 | `context/ToastContext` | ToastProvider + useToast for toast-varsler | Implementert |
 | `query/queryClient` | Standard QueryClient-config | Implementert |
-| `lib/formatters` | Dato, valuta, tall | Implementert |
+| `lib/formatters` | Dato (inkl. `formatDateLong`), valuta, tall | Implementert |
 | `analytics/AnalyticsProvider` | Umami-provider med opt-out og dev-mode | Implementert |
 | `analytics/useAnalytics` | Hook for manuell event-sporing — returnerer `{ trackEvent, identify, reset }` | Implementert |
 | `analytics/TrackClick` | Render prop for klikk-sporing | Implementert |
