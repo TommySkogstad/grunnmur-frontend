@@ -6,6 +6,8 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-03
+
 ### Lagt til
 - `downloadRequest(path, options?)` — som `blobRequest`, men returnerer `{ blob, filename?, headers }` med filnavn parset fra `Content-Disposition` (RFC 5987 `filename*=UTF-8''...` foretrukket, fallback til vanlig `filename="..."`). Fixes #226.
 - `saveBlob(blob, filename)` — helper som laster ned en Blob i nettleseren via objectURL + `<a download>`-klikk, med automatisk opprydding. Fixes #226.
