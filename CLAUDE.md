@@ -100,7 +100,7 @@ npm run lint             # ESLint
 node_modules/react
 node_modules/react-dom
 node_modules/react-router
-node_modules/react-router-dom
+node_modules/@tanstack
 node_modules/.package-lock.json
 ```
 
@@ -134,9 +134,10 @@ fra våre kompilerte `.d.ts`-filer (uten `@types/react` feiler kompilering med
 `'ErrorBoundary' cannot be used as a JSX component`).
 
 **Hva som er trygt å fjerne hvis du må kutte build-context-størrelse senere:**
-Kun `react`, `react-dom`, `react-router` og `react-router-dom`. Ikke fjern
-`@types/react` eller `node_modules` som helhet. Disse er `peerDependencies`
-her, så konsumentene har alltid sine egne runtime-versjoner tilgjengelig.
+Kun `react`, `react-dom` og `react-router` (+ `@tanstack` hvis det blir
+peerDependency). Ikke fjern `@types/react` eller `node_modules` som helhet.
+Disse er `peerDependencies` her, så konsumentene har alltid sine egne
+runtime-versjoner tilgjengelig.
 
 **Fjern aldri `.dockerignore` uten å varsle alle konsumenter** — fjerning
 gjeninnfører bug-en. Hver konsument har en defensiv `RUN rm -rf` i sine egne
