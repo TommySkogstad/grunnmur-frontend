@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router'
 import { createProtectedRoute } from './ProtectedRoute'
 import type { AuthContextValue } from '../auth/AuthContext'
 

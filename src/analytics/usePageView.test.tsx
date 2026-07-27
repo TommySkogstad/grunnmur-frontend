@@ -4,7 +4,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { useState } from 'react'
 import { render, act, cleanup } from '@testing-library/react'
-import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { usePageView } from './usePageView'
 import type { UsePageViewOptions } from './usePageView'
 import { AnalyticsProvider } from './AnalyticsProvider'

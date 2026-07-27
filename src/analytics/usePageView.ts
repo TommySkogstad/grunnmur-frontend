@@ -1,7 +1,7 @@
 /**
  * usePageView — sporer SPA-sidevisninger ved navigasjon med React Router.
  *
- * Krever at komponenten er innenfor en react-router-dom Router.
+ * Krever at komponenten er innenfor en react-router Router.
  *
  * **Semantikk:** Kaller `window.umami.track({ url })` — Umamis native
  * pageview-API. Dette registreres som en ekte sidevisning i Umami-
@@ -30,7 +30,7 @@
  */
 
 import { useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { useAnalyticsContext } from './analyticsContext'
 
 /** Valgfri konfigurasjon for usePageView */
