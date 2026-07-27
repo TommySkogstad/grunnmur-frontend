@@ -6,8 +6,9 @@ export function createMockApiClient(): ApiClient {
     request: vi.fn(),
     formDataRequest: vi.fn(),
     blobRequest: vi.fn(),
+    downloadRequest: vi.fn(),
     getCsrfToken: vi.fn(() => null),
     setCsrfToken: vi.fn(),
     resetUnauthorizedFlag: vi.fn(),
-  }
+  } satisfies ApiClient
 }
