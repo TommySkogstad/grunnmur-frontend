@@ -31,7 +31,7 @@ Pakken krever disse som peer dependencies:
 |-------|---------|-------------|
 | `react` | ^18.0 \|\| ^19.0 | Ja |
 | `react-dom` | ^18.0 \|\| ^19.0 | Ja |
-| `react-router-dom` | ^7.0 | Ja |
+| `react-router` | ^7.0 \|\| ^8.0 | Ja |
 | `@tanstack/react-query` | ^5.0 | Valgfritt |
 
 ## Quick start
@@ -546,7 +546,7 @@ function App() {
 }
 ```
 
-Kaller `window.umami.track({ url: location.pathname })` ved hver pathname-endring — dette er Umamis native pageview-API og gir en ekte sidevisning i dashbordet (se advarselen under `useAnalytics()` over). Krever at komponenten er innenfor en `react-router-dom` Router. Er no-op dersom tracking er deaktivert.
+Kaller `window.umami.track({ url: location.pathname })` ved hver pathname-endring — dette er Umamis native pageview-API og gir en ekte sidevisning i dashbordet (se advarselen under `useAnalytics()` over). Krever at komponenten er innenfor en `react-router` Router. Er no-op dersom tracking er deaktivert.
 
 **Anonymiser dynamiske ID-er/tokens i stien** med `transformUrl` + den medfølgende `anonymizePathname`-helperen (superset av tall/UUID → `:id` og lange hex-strenger → `:token`):
 

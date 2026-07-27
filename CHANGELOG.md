@@ -6,6 +6,9 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Endret
+- `peerDependencies`/`devDependencies` bytter fra `react-router-dom` til `react-router` (`^7.0.0 || ^8.0.0`) — `react-router-dom` er en re-export-shim som fjernes i react-router v8, mens `react-router` er den stabile pakken som allerede er installert transitivt i alle konsumentapper via `react-router-dom@7.x`. Ikke-brytende for eksisterende apper. Intern bruk (`usePageView.ts`, `ProtectedRoute.tsx`) oppdatert tilsvarende. Merk: `react-router@8.3.0` selv krever `react >=19.2.7`, strengere enn grunnmurs egen `react`-peer-range (`^18.0.0 || ^19.0.0`) — apper fortsatt på React 18 (biologportal, 6810, styreportal) kan dermed kun bruke `^7.0.0`-delen av rangen inntil de også oppgraderer React. Fixes #257.
+
 ## [2.1.0] - 2026-07-03
 
 ### Lagt til

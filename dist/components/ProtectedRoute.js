@@ -1,5 +1,5 @@
 import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router';
 /**
  * Opprett en ProtectedRoute-komponent bundet til en spesifikk useAuth-hook.
  *

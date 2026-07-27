@@ -112,11 +112,15 @@ React-instanser i bundlet (en fra grunnmurs node_modules, en fra konsumentens
 egen) — og alle hooks fra grunnmur (AuthProvider, ErrorBoundary etc.) krasjer
 med `Cannot read properties of null (reading 'useState')` på initial render.
 
-**Versjonskrav:** Grunnmur KREVER `react-router-dom` ^7.0 og støtter ikke v6.
-Konsumentapper må derfor også bruke v7. Historisk ble v6-kompatibilitet droppet
-i #135 fordi grunnmurs `ProtectedRoute` bruker v7-spesifikke features (`Outlet`/`Navigate`).
-Se issue #26 for bakgrunnen på den tidligere v6/v7-dobbel-instansmeldingen
-(biologportal-incident 2026-04-10, nå løst).
+**Versjonskrav:** Grunnmur krever peer-pakken `react-router` (ikke lenger
+`react-router-dom`, som er en re-export-shim fjernet i react-router v8 — se
+#257) i range `^7.0.0 || ^8.0.0`, og støtter ikke v6. Konsumentapper som
+fortsatt bruker `react-router-dom` v7 er upåvirket: `react-router-dom@7.x` har
+`react-router@7.x` som intern dependency, hoistet i node_modules — samme
+fysiske modul grunnmur nå importerer fra. Historisk ble v6-kompatibilitet
+droppet i #135 fordi grunnmurs `ProtectedRoute` bruker v7-spesifikke features
+(`Outlet`/`Navigate`). Se issue #26 for bakgrunnen på den tidligere
+v6/v7-dobbel-instansmeldingen (biologportal-incident 2026-04-10, nå løst).
 
 React-incidenten (runde 1) traff biologportal og lo-finans 2026-04-10 — fire
 påfølgende deploys i biologportal feilet smoke-test [7/7] før rotårsaken ble
