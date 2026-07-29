@@ -71,6 +71,7 @@ npm run lint             # ESLint
 ### ProtectedRoute
 - `loginPath`: konfigurerbar
 - `roleCheck`: valgfri callback
+- `unauthorizedPath`: redirect-sti ved feilet rollesjekk (default: loginPath)
 - `loadingComponent`: valgfri spinner
 
 ## Apper som bruker dette biblioteket
