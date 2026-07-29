@@ -82,8 +82,8 @@ npm run lint             # ESLint
 | styreportal | Multi-tenant (TenantContext) |
 | biologportal | React Query, TOTP, Observer-rolle |
 | maskemester | Claude API-integrasjon, strikkekalkulator |
-| smart-casual | Under oppstart |
-| vinforalle | Under oppstart |
+| smart-casual | Full integrasjon (auth, API, analytics, toast); Cloudflare Pages-frontend — bygges via egen `npm ci` mot grunnmur-frontend-repoet, ikke Docker `additional_contexts`/`.dockerignore`-mekanismen |
+| vinforalle | Under oppstart (kun apiClient) |
 
 ## Konvensjoner
 
