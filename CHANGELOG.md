@@ -6,8 +6,17 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-08-19
+
 ### Endret
 - `peerDependencies`/`devDependencies` bytter fra `react-router-dom` til `react-router` (`^7.0.0 || ^8.0.0`) — `react-router-dom` er en re-export-shim som fjernes i react-router v8, mens `react-router` er den stabile pakken som allerede er installert transitivt i alle konsumentapper via `react-router-dom@7.x`. Ikke-brytende for eksisterende apper. Intern bruk (`usePageView.ts`, `ProtectedRoute.tsx`) oppdatert tilsvarende. Merk: `react-router@8.3.0` selv krever `react >=19.2.7`, strengere enn grunnmurs egen `react`-peer-range (`^18.0.0 || ^19.0.0`) — apper fortsatt på React 18 (biologportal, 6810, styreportal) kan dermed kun bruke `^7.0.0`-delen av rangen inntil de også oppgraderer React. Fixes #257.
+
+### Sikkerhet
+- Bumped `postcss` 8.5.18 → 8.5.26 for å patche GHSA-fxqj-rqcc-2cmp.
+- Bumped `nanoid` 3.3.16 → 3.3.18 for å patche GHSA-2v37-7h3g-55p8.
+- Bumped `brace-expansion` 5.0.8 → 5.0.9 for å patche GHSA-rgw5-rvv9-x895.
+- Bumped `undici` 7.28.0 → 7.29.0.
+- Bumped ESLint group (eslint, @eslint/js, typescript-eslint) med 4 oppdateringer.
 
 ## [2.1.0] - 2026-07-03
 
