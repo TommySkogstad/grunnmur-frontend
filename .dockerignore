@@ -1,4 +1,4 @@
-# Forhindrer at konsumenter (biologportal/lo-finans/6810/styreportal) får
+# Forhindrer at konsumenter (biologportal/6810/styreportal/smart-casual/maskemester/vinforalle) får
 # TO instanser av peerDependency-pakker i bundle. Grunnmur installerer disse
 # i devDependencies (for tester), men de skal IKKE shippes til consumers —
 # de er peerDependencies og må komme fra konsumentens egen node_modules.
