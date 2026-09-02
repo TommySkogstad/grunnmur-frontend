@@ -82,7 +82,7 @@ npm run lint             # ESLint
 | styreportal | Multi-tenant (TenantContext) |
 | biologportal | React Query, TOTP, Observer-rolle |
 | maskemester | Claude API-integrasjon, strikkekalkulator |
-| smart-casual | Full integrasjon (auth, API, analytics, toast); Cloudflare Pages-frontend — bygges via egen `npm ci` mot grunnmur-frontend-repoet, ikke Docker `additional_contexts`/`.dockerignore`-mekanismen |
+| smart-casual | Full integrasjon (auth, API, analytics, toast); prod-frontenden er Cloudflare Pages og bygges via egen `npm ci` mot grunnmur-frontend-repoet, mens det gjenværende Docker-oppsettet (burn-in til riving) fortsatt bruker `additional_contexts`/`.dockerignore`-mekanismen |
 | vinforalle | Under oppstart (kun apiClient) |
 
 ## Konvensjoner
@@ -105,13 +105,19 @@ node_modules/@tanstack
 node_modules/.package-lock.json
 ```
 
-**Hvorfor:** Konsumentapper (biologportal, 6810, styreportal, smart-casual) bruker
-oss via `file:../../grunnmur-frontend` og kopierer hele denne mappa inn i
-Docker build-konteksten via `additional_contexts` + `COPY --from=grunnmur-frontend`.
+**Hvorfor:** Konsumentapper (biologportal, 6810, styreportal, smart-casual,
+maskemester, vinforalle) bruker oss via `file:../../grunnmur-frontend` og
+kopierer hele denne mappa inn i Docker build-konteksten via
+`additional_contexts` + `COPY --from=grunnmur-frontend`.
 Hvis vår `node_modules/react` følger med, ender konsumenten opp med to
 React-instanser i bundlet (en fra grunnmurs node_modules, en fra konsumentens
 egen) — og alle hooks fra grunnmur (AuthProvider, ErrorBoundary etc.) krasjer
 med `Cannot read properties of null (reading 'useState')` på initial render.
+
+Merk om smart-casual: prod-frontenden bygges på Cloudflare Pages med egen
+`npm ci` (se konsumenttabellen over), men det gjenværende Docker-oppsettet
+(`docker-compose.yml` + `frontend/Dockerfile.dev|prod`, i burn-in til riving)
+bruker fortsatt `additional_contexts` — og er dermed avhengig av denne fila.
 
 **Versjonskrav:** Grunnmur krever peer-pakken `react-router` (ikke lenger
 `react-router-dom`, som er en re-export-shim fjernet i react-router v8 — se
