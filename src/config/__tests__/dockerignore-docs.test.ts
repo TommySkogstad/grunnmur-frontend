@@ -61,3 +61,87 @@ describe('CLAUDE.md dokumenterer .dockerignore korrekt', () => {
     }
   })
 })
+
+/**
+ * Apper som er arkivert og derfor ikke lenger skal stå i konsumentlisten noe
+ * sted i repoet (se #289 — lo-finans arkivert 2026-05-19).
+ */
+const ARKIVERTE_APPER = ['lo-finans']
+
+/**
+ * Henter innholdet i første fangstgruppe, eller kaster med en forklarende
+ * feilmelding om mønsteret ikke matcher.
+ */
+function kreverMatch(content: string, pattern: RegExp, feilmelding: string): string {
+  const match = content.match(pattern)
+  if (!match) throw new Error(feilmelding)
+  return match[1]
+}
+
+/** Splitter en konsumentliste på `/` eller `,` og trimmer bort mellomrom. */
+function splittKonsumenter(raw: string): string[] {
+  return raw
+    .split(/[/,]/)
+    .map((navn) => navn.trim())
+    .filter((navn) => navn.length > 0)
+}
+
+/**
+ * Henter konsumentlisten fra toppkommentaren i .dockerignore, f.eks.
+ * `# Forhindrer at konsumenter (biologportal/6810/...) får` → `['biologportal', '6810', ...]`.
+ */
+function dockerignoreConsumers(): string[] {
+  const content = readFileSync(resolve(ROOT, '.dockerignore'), 'utf-8')
+  return splittKonsumenter(
+    kreverMatch(
+      content,
+      /konsumenter\s*\(([^)]+)\)/,
+      '.dockerignore mangler «konsumenter (...)»-listen i toppkommentaren'
+    )
+  )
+}
+
+/**
+ * Henter konsumentlisten CLAUDE.md dokumenterer i `.dockerignore`-seksjonen
+ * («Konsumentapper (...) bruker oss via file:../../grunnmur-frontend»).
+ */
+function documentedConsumers(): string[] {
+  const content = readFileSync(resolve(ROOT, 'CLAUDE.md'), 'utf-8')
+  const section = content.indexOf('## Viktig: `.dockerignore`')
+  expect(section, 'CLAUDE.md mangler `.dockerignore`-seksjonen').toBeGreaterThan(-1)
+
+  return splittKonsumenter(
+    kreverMatch(
+      content.slice(section),
+      /Konsumentapper\s*\(([^)]+)\)/,
+      'CLAUDE.md mangler «Konsumentapper (...)»-listen i `.dockerignore`-seksjonen'
+    )
+  )
+}
+
+describe('CLAUDE.md dokumenterer konsumentlisten i .dockerignore korrekt', () => {
+  it('dokumenterer nøyaktig de samme konsumentappene som .dockerignore-kommentaren', () => {
+    // Rekkefølgen er ikke del av kontrakten, men innholdet er: legges en ny
+    // konsument til i .dockerignore uten at CLAUDE.md følger etter (eller
+    // omvendt), blir testen rød. Se #291.
+    expect([...documentedConsumers()].sort()).toEqual([...dockerignoreConsumers()].sort())
+  })
+
+  it('lister ingen arkiverte apper i .dockerignore-kommentaren (se #289)', () => {
+    for (const arkivert of ARKIVERTE_APPER) {
+      expect(
+        dockerignoreConsumers(),
+        `.dockerignore lister «${arkivert}», som er arkivert og ikke lenger er konsument`
+      ).not.toContain(arkivert)
+    }
+  })
+
+  it('lister ingen arkiverte apper i CLAUDE.md-konsumentlisten (se #289)', () => {
+    for (const arkivert of ARKIVERTE_APPER) {
+      expect(
+        documentedConsumers(),
+        `CLAUDE.md lister «${arkivert}», som er arkivert og ikke lenger er konsument`
+      ).not.toContain(arkivert)
+    }
+  })
+})
