@@ -69,20 +69,25 @@ describe('CLAUDE.md dokumenterer .dockerignore korrekt', () => {
 const ARKIVERTE_APPER = ['lo-finans']
 
 /**
- * Henter innholdet i første fangstgruppe, eller kaster med en forklarende
- * feilmelding om mønsteret ikke matcher.
+ * Henter innholdet i første fangstgruppe. Feiler testen med en forklarende
+ * melding om mønsteret ikke matcher (samme expect-idiom som resten av fila).
  */
 function kreverMatch(content: string, pattern: RegExp, feilmelding: string): string {
   const match = content.match(pattern)
-  if (!match) throw new Error(feilmelding)
-  return match[1]
+  expect(match, feilmelding).not.toBeNull()
+  // Ureachable når expect over feiler — `?? ''` er kun for typesnevring.
+  return match?.[1] ?? ''
 }
 
-/** Splitter en konsumentliste på `/` eller `,` og trimmer bort mellomrom. */
+/**
+ * Splitter en konsumentliste på `/` eller `,`. Trimmer bort mellomrom og et
+ * eventuelt `#`-prefiks, slik at en toppkommentar som brytes over flere
+ * `#`-linjer ikke gir falsk rød test.
+ */
 function splittKonsumenter(raw: string): string[] {
   return raw
     .split(/[/,]/)
-    .map((navn) => navn.trim())
+    .map((navn) => navn.replace(/^[\s#]+/, '').trim())
     .filter((navn) => navn.length > 0)
 }
 
@@ -110,11 +115,18 @@ function documentedConsumers(): string[] {
   const section = content.indexOf('## Viktig: `.dockerignore`')
   expect(section, 'CLAUDE.md mangler `.dockerignore`-seksjonen').toBeGreaterThan(-1)
 
+  // Avgrens til seksjonen (fram til neste `## `-heading) og ankre til
+  // «**Hvorfor:**»-avsnittet. Ordet «Konsumentapper» forekommer flere ganger i
+  // CLAUDE.md, så en uankret regex over resten av fila kunne plukket feil
+  // parentes hvis teksten rundt endres senere.
+  const nextHeading = content.indexOf('\n## ', section + 1)
+  const sectionBody = content.slice(section, nextHeading > -1 ? nextHeading : undefined)
+
   return splittKonsumenter(
     kreverMatch(
-      content.slice(section),
-      /Konsumentapper\s*\(([^)]+)\)/,
-      'CLAUDE.md mangler «Konsumentapper (...)»-listen i `.dockerignore`-seksjonen'
+      sectionBody,
+      /\*\*Hvorfor:\*\*\s*Konsumentapper\s*\(([^)]+)\)/,
+      'CLAUDE.md mangler «**Hvorfor:** Konsumentapper (...)»-listen i `.dockerignore`-seksjonen'
     )
   )
 }
