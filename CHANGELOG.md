@@ -6,6 +6,11 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-09-12
+
+### Fjernet
+- **BREAKING:** hele `analytics/`-modulen er fjernet: `AnalyticsProvider`, `useAnalytics`, `TrackClick`, `usePageView`, `anonymizePathname`, `useAnalyticsIdentity` og `AnalyticsIdentitySync` (samt typene `AnalyticsProviderProps`, `TrackClickProps`, `UsePageViewOptions`, `AnalyticsIdentityUser`, `AnalyticsIdentitySyncProps`). Umami-analytics ble avviklet i porteføljen 2026-09-12 (eierbeslutning, tommytv-infra#545), og alle konsumentapper (biologportal#1832, 6810#963, styreportal#1157, maskemester#219, vinforalle#273, smart-casual#1185) har allerede sluttet å importere modulen. Fixes #297.
+
 ## [2.2.0] - 2026-08-19
 
 ### Endret
