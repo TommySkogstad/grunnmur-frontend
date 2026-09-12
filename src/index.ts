@@ -43,19 +43,6 @@ export { ToastProvider } from './context/ToastContext'
 export { useToast } from './context/toastContext'
 export type { ToastType, ToastContextValue } from './context/toastContext'
 
-// Analytics
-export { AnalyticsProvider } from './analytics/AnalyticsProvider'
-export type { AnalyticsProviderProps } from './analytics/AnalyticsProvider'
-export { useAnalytics } from './analytics/useAnalytics'
-export { TrackClick } from './analytics/TrackClick'
-export type { TrackClickProps } from './analytics/TrackClick'
-export { usePageView } from './analytics/usePageView'
-export type { UsePageViewOptions } from './analytics/usePageView'
-export { anonymizePathname } from './analytics/anonymizePathname'
-export { useAnalyticsIdentity } from './analytics/useAnalyticsIdentity'
-export type { AnalyticsIdentityUser } from './analytics/useAnalyticsIdentity'
-export { AnalyticsIdentitySync } from './analytics/AnalyticsIdentitySync'
-export type { AnalyticsIdentitySyncProps } from './analytics/AnalyticsIdentitySync'
 
 // Issue-rapportering
 export { useIssueReport } from './issues/useIssueReport'

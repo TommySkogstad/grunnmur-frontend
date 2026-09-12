@@ -115,31 +115,6 @@ describe('Formatter interne symboler er ikke i public API', () => {
   })
 })
 
-describe('Analytics interne symboler er ikke i public API', () => {
-  it('hashUserId er ikke eksportert fra useAnalytics-modulen', async () => {
-    const mod = await import('../../analytics/useAnalytics')
-    expect('hashUserId' in mod).toBe(false)
-  })
-
-  it('useAnalyticsContext er ikke eksportert fra index', () => {
-    expect('useAnalyticsContext' in indexExports).toBe(false)
-  })
-
-  it('AnalyticsContext er ikke eksportert fra index', () => {
-    expect('AnalyticsContext' in indexExports).toBe(false)
-  })
-
-  it('AnalyticsContext er ikke eksportert fra AnalyticsProvider-modulen', async () => {
-    const mod = await import('../../analytics/AnalyticsProvider')
-    expect('AnalyticsContext' in mod).toBe(false)
-  })
-
-  it('useAnalyticsContext er ikke eksportert fra AnalyticsProvider-modulen', async () => {
-    const mod = await import('../../analytics/AnalyticsProvider')
-    expect('useAnalyticsContext' in mod).toBe(false)
-  })
-})
-
 describe('package.json eksponerer config-filer', () => {
   it('files inkluderer config/ og tsconfig.base.json', () => {
     const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8'))

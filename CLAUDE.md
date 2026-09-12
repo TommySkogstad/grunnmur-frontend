@@ -42,13 +42,6 @@ npm run lint             # ESLint
 | `context/ToastContext` | ToastProvider + useToast for toast-varsler | Implementert |
 | `query/queryClient` | Standard QueryClient-config | Implementert |
 | `lib/formatters` | Dato (inkl. `formatDateLong`), valuta, tall | Implementert |
-| `analytics/AnalyticsProvider` | Umami-provider med opt-out og dev-mode | Implementert |
-| `analytics/useAnalytics` | Hook for manuell event-sporing — returnerer `{ trackEvent, identify, reset }` | Implementert |
-| `analytics/TrackClick` | Render prop for klikk-sporing | Implementert |
-| `analytics/usePageView` | Hook for SPA-sidevisnings-sporing | Implementert |
-| `analytics/useAnalyticsIdentity` | Synker Umami-sesjon med innlogget bruker (identify/reset) | Implementert |
-| `analytics/AnalyticsIdentitySync` | Mountbar wrapper rundt useAnalyticsIdentity | Implementert |
-| `analytics/anonymizePathname` | Helper for å anonymisere ID-er/tokens i `usePageView({ transformUrl })` | Implementert |
 | `issues/useIssueReport` | Headless hook for rapporter-feil-skjemaer mot backendens `POST /issues` | Implementert |
 
 ## Konfigurasjonspunkter
@@ -82,7 +75,7 @@ npm run lint             # ESLint
 | styreportal | Multi-tenant (TenantContext) |
 | biologportal | React Query, TOTP, Observer-rolle |
 | maskemester | Claude API-integrasjon, strikkekalkulator |
-| smart-casual | Full integrasjon (auth, API, analytics, toast); prod-frontenden er Cloudflare Pages og bygges via egen `npm ci` mot grunnmur-frontend-repoet, mens det gjenværende Docker-oppsettet (burn-in til riving) fortsatt bruker `additional_contexts`/`.dockerignore`-mekanismen |
+| smart-casual | Full integrasjon (auth, API, toast); prod-frontenden er Cloudflare Pages og bygges via egen `npm ci` mot grunnmur-frontend-repoet, mens det gjenværende Docker-oppsettet (burn-in til riving) fortsatt bruker `additional_contexts`/`.dockerignore`-mekanismen |
 | vinforalle | Under oppstart (kun apiClient) |
 
 ## Konvensjoner
