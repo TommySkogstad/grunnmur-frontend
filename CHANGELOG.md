@@ -6,6 +6,12 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Sikkerhet
+- Bumped `browserslist` for å patche GHSA-73wf-gq98-2v4g og GHSA-c83g-rgw3-j3cx (HIGH).
+- Bumped `@humanfs/node` for å patche GHSA-p498-v437-472g (MODERATE).
+- Bumped `baseline-browser-mapping` for å patche GHSA-w5vr-8v7q-w6rv (MODERATE).
+- Bumped `@babel/core` for å patche GHSA-4x5r-pxfx-6jf8 (LOW).
+
 ## [3.0.0] - 2026-09-12
 
 ### Fjernet
