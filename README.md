@@ -4,24 +4,28 @@ Felles frontend-bibliotek for Kotlin/Ktor-appene i portefoljen. Tilsvarer `grunn
 
 ## Installasjon
 
-Pakken publiseres til GitHub Packages (privat, `@tommyskogstad` scope).
+Pakken publiseres **ikke** til GitHub Packages eller npm. Den konsumeres som et
+internt monorepo-lignende oppsett: konsumentappen ligger som et søsken-repo på
+disk, og peker til denne mappa via en relativ `file:`-avhengighet.
 
-### 1. Autentisering mot GitHub Packages
-
-Opprett eller rediger `~/.npmrc`:
-
+```json
+// I konsumentappens package.json
+{
+  "dependencies": {
+    "@tommyskogstad/frontend-core": "file:../../grunnmur-frontend"
+  }
+}
 ```
-@tommyskogstad:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=ghp_DIN_TOKEN
-```
 
-Tokenet trenger `read:packages` scope. Generer det under [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens).
+Etter `npm install` setter npm opp en symlink til denne mappa i konsumentens
+`node_modules`. Docker-builds i konsumentappene kopierer hele denne mappa inn
+i build-konteksten via `additional_contexts` (se `.dockerignore` under, som
+hindrer at konsumentens React-instans kolliderer med en runtime-React fra
+denne pakken).
 
-### 2. Installer pakken
-
-```bash
-npm install @tommyskogstad/frontend-core
-```
+GitHub Packages-publisering var en opprinnelig plan (se issue #1, #6, #18),
+men ble aldri fullført — det finnes ingen publish-workflow, og pakken er ikke
+søkbar på registeret.
 
 ### Peer dependencies
 
