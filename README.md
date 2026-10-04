@@ -330,13 +330,18 @@ function MyComponent() {
 
 | Funksjon | Beskrivelse |
 |----------|-------------|
-| `showToast(message, type, durationMs?)` | Viser en toast-varsling (returnerer toast ID; auto-dismiss etter 4s eller custom duration) |
+| `showToast(message, type, durationMs?, action?)` | Viser en toast-varsling (returnerer toast ID; auto-dismiss etter 4s eller custom duration; valgfri handling) |
 | `removeToast(id)` | Fjerner en toast programmatisk ved hjelp av ID |
 
 **Typer:**
 
 - `type: 'success' \| 'error' \| 'info'` — styrer farge og ikon
 - `durationMs?: number` — auto-dismiss varighet i millisekunder (default: 4000)
+- `action?: { label: string, onClick: () => void }` — valgfri handlingsknapp, f.eks. «Prøv igjen» på en feilmelding. Toasten fjernes når knappen er trykket.
+
+```tsx
+showToast('Lagring feilet', 'error', 8000, { label: 'Prøv igjen', onClick: save })
+```
 
 **Egenskaper:**
 - Fixed positioning (bottom-right)
@@ -344,6 +349,94 @@ function MyComponent() {
 - Lukk-knapp for manuell dismiss
 - Ikoner: ✓ (success), ⚠ (error), ℹ (info)
 - ARIA-live region for skjermlesere
+
+---
+
+### `Modal`
+
+Tilgjengelig modal-dialog: `role="dialog"`, `aria-modal="true"`, `aria-labelledby` mot tittelen, fokusfelle (Tab og Shift+Tab går rundt inne i dialogen), Escape lukker, klikk utenfor lukker, og fokus går tilbake til elementet som åpnet dialogen. Rendres i en portal på `document.body`. Styling via Tailwind, som `ToastProvider`.
+
+```tsx
+import { Modal } from '@tommyskogstad/frontend-core'
+
+<Modal open={open} title="Rediger medlem" onClose={() => setOpen(false)} footer={<button onClick={save}>Lagre</button>}>
+  <input aria-label="Navn" />
+</Modal>
+```
+
+| Prop | Type | Beskrivelse |
+|------|------|-------------|
+| `open` | `boolean` | Om dialogen vises |
+| `onClose` | `() => void` | Kalles ved Escape eller klikk utenfor |
+| `title` | `ReactNode` | Tittel, knyttet til dialogen via `aria-labelledby` |
+| `children` | `ReactNode` | Innhold |
+| `footer` | `ReactNode` | Bunnlinje, typisk knapper |
+| `closeOnEscape` | `boolean` | Lukk på Escape (default `true`) |
+| `closeOnOverlayClick` | `boolean` | Lukk ved klikk utenfor (default `true`) |
+| `initialFocusRef` | `RefObject<HTMLElement>` | Element som får fokus ved åpning (default første fokuserbare) |
+| `busy` | `boolean` | Setter `aria-busy` på dialogen |
+| `className` | `string` | Ekstra klasser på dialogboksen |
+
+---
+
+### `ConfirmDialog`
+
+Bekreftelsesdialog bygd på `Modal`. Innholdet er barn, så appen kan liste hva som skjer. Er `onConfirm` async, vises ventetilstand (knappene deaktiveres, `aria-busy`) til promiset er ferdig, og dobbeltklikk hindres. Escape og klikk utenfor avbryter ikke mens handlingen kjører. Kaster `onConfirm`, forblir dialogen åpen og ventetilstanden nullstilles; feilen håndteres av appen.
+
+```tsx
+import { ConfirmDialog } from '@tommyskogstad/frontend-core'
+
+<ConfirmDialog
+  open={open}
+  title="Slette medlem?"
+  variant="danger"
+  confirmLabel="Slett"
+  onConfirm={async () => { await api.delete(`/medlemmer/${id}`); setOpen(false) }}
+  onCancel={() => setOpen(false)}
+>
+  Medlemmet og alle stemmer fjernes.
+</ConfirmDialog>
+```
+
+| Prop | Type | Beskrivelse |
+|------|------|-------------|
+| `open` | `boolean` | Om dialogen vises |
+| `title` | `ReactNode` | Tittel |
+| `children` | `ReactNode` | Innhold |
+| `confirmLabel` / `cancelLabel` | `string` | Knappetekster (default «Bekreft» / «Avbryt») |
+| `variant` | `'default' \| 'danger'` | `danger` markerer bekreft-knappen (`data-variant="danger"`) og gir fokus til avbryt |
+| `busy` | `boolean` | Ytre ventetilstand, i tillegg til den fra et async `onConfirm` |
+| `onConfirm` | `() => void \| Promise<void>` | Kalles ved bekreft |
+| `onCancel` | `() => void` | Kalles ved avbryt, Escape eller klikk utenfor |
+| `closeOnOverlayClick` | `boolean` | Default `true` |
+
+---
+
+### `ConfirmProvider` og `useConfirm()`
+
+Promise-basert erstatning for `window.confirm()`. `useConfirm()` returnerer en funksjon som viser en `ConfirmDialog` og løser til `true` ved bekreft og `false` ved avbryt, Escape eller klikk utenfor. Starter du en ny bekreftelse mens en annen er åpen, løses den første til `false`.
+
+```tsx
+import { ConfirmProvider, useConfirm } from '@tommyskogstad/frontend-core'
+
+// Wrap app-roten
+<ConfirmProvider>
+  <App />
+</ConfirmProvider>
+
+// Før: if (!confirm('Slette medlemmet?')) return
+const confirm = useConfirm()
+
+const handleDelete = async () => {
+  if (!(await confirm({ title: 'Slette medlemmet?', message: 'Alle stemmer fjernes.', confirmLabel: 'Slett', variant: 'danger' }))) return
+  await api.delete(`/medlemmer/${id}`)
+}
+
+// Kortform: en ren streng blir meldingen
+if (!(await confirm('Slette medlemmet?'))) return
+```
+
+`ConfirmOptions`: `title?`, `message?`, `confirmLabel?`, `cancelLabel?`, `variant?`.
 
 ---
 

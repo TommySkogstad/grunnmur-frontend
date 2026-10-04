@@ -272,4 +272,35 @@ describe('ToastContext', () => {
     expect(clearTimeoutSpy).toHaveBeenCalled()
     clearTimeoutSpy.mockRestore()
   })
+  describe('handling', () => {
+    function ActionTest({ onRetry }: { onRetry: () => void }) {
+      const { showToast } = useToast()
+      return (
+        <button onClick={() => showToast('Lagring feilet', 'error', 4000, { label: 'Prøv igjen', onClick: onRetry })}>
+          Vis
+        </button>
+      )
+    }
+
+    it('viser handlingsknapp med tekst og kaller tilbakekallet', () => {
+      const onRetry = vi.fn()
+      renderWithProvider(<ActionTest onRetry={onRetry} />)
+      act(() => { fireEvent.click(screen.getByText('Vis')) })
+      fireEvent.click(screen.getByRole('button', { name: 'Prøv igjen' }))
+      expect(onRetry).toHaveBeenCalledTimes(1)
+    })
+
+    it('fjerner toasten etter at handlingen er utført', () => {
+      renderWithProvider(<ActionTest onRetry={() => {}} />)
+      act(() => { fireEvent.click(screen.getByText('Vis')) })
+      fireEvent.click(screen.getByRole('button', { name: 'Prøv igjen' }))
+      expect(screen.queryByText('Lagring feilet')).toBeNull()
+    })
+
+    it('viser ingen handlingsknapp når action ikke er satt', () => {
+      renderWithProvider(<TestComponent />)
+      act(() => { fireEvent.click(screen.getByText('Vis error')) })
+      expect(screen.queryByRole('button', { name: 'Prøv igjen' })).toBeNull()
+    })
+  })
 })

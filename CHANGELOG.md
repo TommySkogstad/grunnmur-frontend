@@ -6,6 +6,14 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-10-04
+
+### Lagt til
+- `Modal` — tilgjengelig dialog med `role="dialog"`, `aria-modal`, `aria-labelledby`, fokusfelle, Escape og klikk utenfor (kan slås av) og fokus tilbake til opphavet.
+- `ConfirmDialog` — bekreftelsesdialog bygd på `Modal` med innhold som barn, egne knappetekster, `danger`-variant og ventetilstand med dobbeltklikk-vern.
+- `ConfirmProvider` og `useConfirm()` — Promise-basert erstatning for `window.confirm()`.
+- `showToast(message, type, durationMs?, action?)` — valgfri handling med tekst og tilbakekall («Prøv igjen»). Ikke-brytende. Del av styreportal#1184, #316.
+
 ### Sikkerhet
 - Bumped `browserslist` for å patche GHSA-73wf-gq98-2v4g og GHSA-c83g-rgw3-j3cx (HIGH).
 - Bumped `@humanfs/node` for å patche GHSA-p498-v437-472g (MODERATE).
