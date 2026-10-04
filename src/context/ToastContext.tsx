@@ -1,12 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { ToastContext } from './toastContext'
-import type { ToastType } from './toastContext'
+import type { ToastAction, ToastType } from './toastContext'
 
 interface ToastItem {
   id: number
   message: string
   type: ToastType
+  action?: ToastAction
 }
 
 /**
@@ -18,14 +19,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const idRef = useRef(0)
   const timerRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map())
 
-  const showToast = useCallback((message: string, type: ToastType, durationMs = 4000): number => {
+  const showToast = useCallback((message: string, type: ToastType, durationMs = 4000, action?: ToastAction): number => {
     const id = ++idRef.current
     const timerId = setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id))
       timerRef.current.delete(id)
     }, durationMs)
     timerRef.current.set(id, timerId)
-    setToasts(prev => [...prev, { id, message, type }])
+    setToasts(prev => [...prev, { id, message, type, action }])
     return id
   }, [])
 
@@ -102,6 +103,17 @@ function ToastItemComponent({ toast, onRemove }: { toast: ToastItem; onRemove: (
         )}
       </div>
       <p className="text-sm font-medium text-gray-900">{toast.message}</p>
+      {toast.action && (
+        <button
+          onClick={() => {
+            toast.action?.onClick()
+            onRemove(toast.id)
+          }}
+          className="text-sm font-medium text-primary-600 hover:text-primary-700 underline"
+        >
+          {toast.action.label}
+        </button>
+      )}
       <button
         onClick={() => onRemove(toast.id)}
         className="p-1 text-gray-400 hover:text-gray-600"

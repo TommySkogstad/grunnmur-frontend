@@ -14,6 +14,8 @@ export { createAuthApi } from './auth/authApi';
 // Komponenter
 export { ErrorBoundary } from './components/ErrorBoundary';
 export { createProtectedRoute } from './components/ProtectedRoute';
+export { Modal } from './components/Modal';
+export { ConfirmDialog } from './components/ConfirmDialog';
 // Query
 export { createQueryClient } from './query/queryClient';
 // Formatters
@@ -21,5 +23,7 @@ export { formatCurrency, formatDate, formatDateLong, formatDateTime, formatNumbe
 // Context
 export { ToastProvider } from './context/ToastContext';
 export { useToast } from './context/toastContext';
+export { ConfirmProvider } from './context/ConfirmContext';
+export { useConfirm } from './context/confirmContext';
 // Issue-rapportering
 export { useIssueReport } from './issues/useIssueReport';

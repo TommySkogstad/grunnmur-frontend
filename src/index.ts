@@ -23,6 +23,10 @@ export { ErrorBoundary } from './components/ErrorBoundary'
 export type { ErrorBoundaryProps } from './components/ErrorBoundary'
 export { createProtectedRoute } from './components/ProtectedRoute'
 export type { ProtectedRouteProps } from './components/ProtectedRoute'
+export { Modal } from './components/Modal'
+export type { ModalProps } from './components/Modal'
+export { ConfirmDialog } from './components/ConfirmDialog'
+export type { ConfirmDialogProps } from './components/ConfirmDialog'
 
 // Query
 export { createQueryClient } from './query/queryClient'
@@ -41,7 +45,10 @@ export {
 // Context
 export { ToastProvider } from './context/ToastContext'
 export { useToast } from './context/toastContext'
-export type { ToastType, ToastContextValue } from './context/toastContext'
+export type { ToastType, ToastAction, ToastContextValue } from './context/toastContext'
+export { ConfirmProvider } from './context/ConfirmContext'
+export { useConfirm } from './context/confirmContext'
+export type { ConfirmOptions, ConfirmFn } from './context/confirmContext'
 
 
 // Issue-rapportering
