@@ -5,6 +5,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { useRef, useState } from 'react'
 import { Modal } from './Modal'
+import { axeViolations } from '../test/axe'
 
 afterEach(cleanup)
 
@@ -147,5 +148,17 @@ describe('Modal', () => {
   it('rendrer footer', () => {
     render(<Basic footer={<button>Lagre</button>} />)
     expect(screen.getByText('Lagre')).toBeTruthy()
+  })
+
+  describe('axe', () => {
+    it('har ingen tilgjengelighetsbrudd når den er åpen', async () => {
+      render(<Basic />)
+      expect(await axeViolations()).toEqual([])
+    })
+
+    it('har ingen brudd med footer og ventetilstand', async () => {
+      render(<Basic busy footer={<button>Lagre</button>} />)
+      expect(await axeViolations()).toEqual([])
+    })
   })
 })

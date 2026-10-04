@@ -4,6 +4,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, cleanup, act } from '@testing-library/react'
 import { ConfirmDialog } from './ConfirmDialog'
+import { axeViolations } from '../test/axe'
 
 afterEach(cleanup)
 
@@ -94,5 +95,33 @@ describe('ConfirmDialog', () => {
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Bekreft' })) })
     process.off('unhandledRejection', unhandled)
     expect((screen.getByRole('button', { name: 'Bekreft' }) as HTMLButtonElement).disabled).toBe(false)
+  })
+
+  describe('axe', () => {
+    it('har ingen tilgjengelighetsbrudd i standardvarianten', async () => {
+      render(
+        <ConfirmDialog open title="Slette?" onConfirm={() => {}} onCancel={() => {}}>
+          <ul><li>Fjerner 3 rader</li></ul>
+        </ConfirmDialog>
+      )
+      expect(await axeViolations()).toEqual([])
+    })
+
+    it('har ingen brudd i danger-varianten', async () => {
+      render(
+        <ConfirmDialog open title="Slette?" variant="danger" confirmLabel="Slett" onConfirm={() => {}} onCancel={() => {}}>
+          Dette kan ikke angres.
+        </ConfirmDialog>
+      )
+      expect(await axeViolations()).toEqual([])
+    })
+
+    it('har ingen brudd mens handlingen kjører', async () => {
+      render(
+        <ConfirmDialog open title="Slette?" onConfirm={() => new Promise<void>(() => {})} onCancel={() => {}} />
+      )
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Bekreft' })) })
+      expect(await axeViolations()).toEqual([])
+    })
   })
 })
