@@ -39,7 +39,10 @@ npm run lint             # ESLint
 | `auth/authApi` | requestCode, verifyCode, getMe, getSession, logout | Implementert |
 | `components/ErrorBoundary` | Styling-agnostisk error boundary | Implementert |
 | `components/ProtectedRoute` | Konfigurerbar med roleCheck callback | Implementert |
+| `components/Modal` | Tilgjengelig dialog med fokusfelle og dialog-semantikk | Implementert |
+| `components/ConfirmDialog` | Bekreftelsesdialog bygd på Modal, erstatter window.confirm() | Implementert |
 | `context/ToastContext` | ToastProvider + useToast for toast-varsler | Implementert |
+| `context/ConfirmContext` | ConfirmProvider + useConfirm for promise-basert bekreftelse | Implementert |
 | `query/queryClient` | Standard QueryClient-config | Implementert |
 | `lib/formatters` | Dato (inkl. `formatDateLong`), valuta, tall | Implementert |
 | `issues/useIssueReport` | Headless hook for rapporter-feil-skjemaer mot backendens `POST /issues` | Implementert |
