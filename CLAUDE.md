@@ -41,6 +41,8 @@ npm run lint             # ESLint
 | `components/ProtectedRoute` | Konfigurerbar med roleCheck callback | Implementert |
 | `components/Modal` | Tilgjengelig dialog med fokusfelle og dialog-semantikk | Implementert |
 | `components/ConfirmDialog` | Bekreftelsesdialog bygd på Modal, erstatter window.confirm() | Implementert |
+| `components/EmptyState` | Tom tilstand med ikon, tittel, forklaring og inntil to handlinger | Implementert |
+| `components/Skeleton` | Plassholdere (linje, tabellrad, kort) med aria-busy og reduced-motion | Implementert |
 | `context/ToastContext` | ToastProvider + useToast for toast-varsler | Implementert |
 | `context/ConfirmContext` | ConfirmProvider + useConfirm for promise-basert bekreftelse | Implementert |
 | `query/queryClient` | Standard QueryClient-config | Implementert |
