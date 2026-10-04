@@ -412,6 +412,51 @@ import { ConfirmDialog } from '@tommyskogstad/frontend-core'
 
 ---
 
+### `EmptyState`
+
+Tom tilstand for lister og sider: valgfritt ikon (skjules for skjermlesere), tittel, forklaring og inntil to handlinger. En handling med `href` blir en `<a>`, ellers en `<button>`. Den første handlingen er primær; flere enn to ignoreres.
+
+```tsx
+import { EmptyState } from '@tommyskogstad/frontend-core'
+
+<EmptyState
+  title="Ingen medlemmer ennå"
+  description="Legg til det første medlemmet for å komme i gang."
+  actions={[{ label: 'Legg til medlem', onClick: openForm }, { label: 'Les mer', href: '/hjelp' }]}
+/>
+```
+
+| Prop | Type | Beskrivelse |
+|------|------|-------------|
+| `icon` | `ReactNode` | Valgfritt ikon |
+| `title` | `ReactNode` | Tittel |
+| `description` | `ReactNode` | Forklaring |
+| `actions` | `{ label, onClick?, href? }[]` | Inntil to handlinger |
+| `headingLevel` | `2 \| 3 \| 4` | Nivå på tittelen (default 2) |
+| `className` | `string` | Ekstra klasser |
+
+---
+
+### `Skeleton`
+
+Grå plassholdere mens innhold lastes. Beholderen har `role="status"`, `aria-busy="true"` og `aria-label`; plassholderne skjules for skjermlesere. Pulsen slås av ved `prefers-reduced-motion` via Tailwinds `motion-reduce:animate-none`.
+
+```tsx
+import { Skeleton } from '@tommyskogstad/frontend-core'
+
+{isLoading ? <Skeleton variant="table-row" count={5} columns={4} label="Laster medlemmer" /> : <Tabell />}
+```
+
+| Prop | Type | Beskrivelse |
+|------|------|-------------|
+| `variant` | `'line' \| 'table-row' \| 'card'` | Form (default `line`) |
+| `count` | `number` | Antall linjer, rader eller kort (default 1) |
+| `columns` | `number` | Celler per rad for `table-row` (default 4) |
+| `label` | `string` | Tilgjengelig navn (default «Laster») |
+| `className` | `string` | Ekstra klasser |
+
+---
+
 ### `ConfirmProvider` og `useConfirm()`
 
 Promise-basert erstatning for `window.confirm()`. `useConfirm()` returnerer en funksjon som viser en `ConfirmDialog` og løser til `true` ved bekreft og `false` ved avbryt, Escape eller klikk utenfor. Starter du en ny bekreftelse mens en annen er åpen, løses den første til `false`.
