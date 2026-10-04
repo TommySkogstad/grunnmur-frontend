@@ -76,4 +76,13 @@ describe('EmptyState', () => {
       expect(await axeViolations()).toEqual([])
     })
   })
+
+  it('gir ingen nøkkelkollisjon når begge handlinger har samme label', () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {})
+    render(<EmptyState title="Tom" actions={[{ label: 'Ok', onClick: () => {} }, { label: 'Ok', href: '/x' }]} />)
+    const keyWarnings = err.mock.calls.filter((c) => String(c[0]).includes('same key'))
+    err.mockRestore()
+    expect(keyWarnings).toEqual([])
+    expect(screen.getAllByText('Ok')).toHaveLength(2)
+  })
 })

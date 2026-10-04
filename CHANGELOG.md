@@ -6,14 +6,14 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Lagt til
+- axe-tester (`axe-core` som devDependency) for `Modal` og `ConfirmDialog`: ingen tilgjengelighetsbrudd i åpen tilstand, `danger`-variant, `busy` og ventetilstand. Ingen endring i publisert kode. Del av #316.
+
 ## [3.2.0] - 2026-10-04
 
 ### Lagt til
 - `EmptyState` — tom tilstand med valgfritt ikon, tittel, forklaring og inntil to handlinger (ekte `<button>` eller `<a>` ved `href`).
 - `Skeleton` — grå plassholdere for `line`, `table-row` og `card`, med `aria-busy` på beholderen og ingen animasjon ved `prefers-reduced-motion`. Ikke-brytende. Del av styreportal#1184, #317.
-
-### Lagt til
-- axe-tester (`axe-core` som devDependency) for `Modal` og `ConfirmDialog`: ingen tilgjengelighetsbrudd i åpen tilstand, `danger`-variant, `busy` og ventetilstand. Ingen endring i publisert kode. Del av #316.
 
 ## [3.1.0] - 2026-10-04
 

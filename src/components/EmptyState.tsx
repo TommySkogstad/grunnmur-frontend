@@ -70,11 +70,11 @@ export function EmptyState({
           {actions.slice(0, 2).map((action, i) => {
             const classes = i === 0 ? primaryClasses : secondaryClasses
             return action.href !== undefined ? (
-              <a key={action.label} href={action.href} onClick={action.onClick} className={classes}>
+              <a key={`${i}-${action.label}`} href={action.href} onClick={action.onClick} className={classes}>
                 {action.label}
               </a>
             ) : (
-              <button key={action.label} type="button" onClick={action.onClick} className={classes}>
+              <button key={`${i}-${action.label}`} type="button" onClick={action.onClick} className={classes}>
                 {action.label}
               </button>
             )
