@@ -6,6 +6,9 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Lagt til
+- axe-tester (`axe-core` som devDependency) for `Modal` og `ConfirmDialog`: ingen tilgjengelighetsbrudd i åpen tilstand, `danger`-variant, `busy` og ventetilstand. Ingen endring i publisert kode. Del av #316.
+
 ## [3.1.0] - 2026-10-04
 
 ### Lagt til
