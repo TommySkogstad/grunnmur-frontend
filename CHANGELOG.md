@@ -9,6 +9,12 @@ og prosjektet folger [Semantic Versioning](https://semver.org/).
 ### Lagt til
 - axe-tester (`axe-core` som devDependency) for `Modal` og `ConfirmDialog`: ingen tilgjengelighetsbrudd i åpen tilstand, `danger`-variant, `busy` og ventetilstand. Ingen endring i publisert kode. Del av #316.
 
+### Sikkerhet
+- Bumped `undici` 7.29.0 → 7.30.0 for å patche GHSA-2gqq-gqf2-x968, GHSA-2jfj-6hjv-fm6j, GHSA-3wwx-pv8p-q78v, GHSA-3xpg-4rpp-hhhm, GHSA-8436-99hf-9mmv, GHSA-pmjh-fq2x-6v4x, GHSA-r53p-7pc4-xj5r, GHSA-rfgv-xxqx-mfg5, GHSA-rx4f-c7p8-82vq og GHSA-w293-vg96-wgc3.
+- Bumped `brace-expansion` 5.0.9 → 5.0.12 for å patche GHSA-6j4f-fj2g-mc7p, GHSA-q2hr-2g5m-vwhr og GHSA-qhr7-859c-m2p7; `overrides`-gulvet er løftet til `^5.0.12`.
+- Bumped `source-map-js` 1.2.1 → 1.2.2 for å patche GHSA-68fv-2mgg-jv7q.
+- Alle tre er transitive devDependencies. Ingen endring i publisert kode. Fixes #326.
+
 ## [3.2.0] - 2026-10-04
 
 ### Lagt til
