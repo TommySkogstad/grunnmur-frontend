@@ -2,6 +2,42 @@
 
 Felles frontend-bibliotek for Kotlin/Ktor-appene i portefoljen. Tilsvarer `grunnmur` (Kotlin-bibliotek) for backend, men for React/TypeScript frontend.
 
+## Slik fungerer det
+
+```mermaid
+%% Avledet fra: src/index.ts, package.json (exports), src/api/apiClient.ts, src/auth/authApi.ts, src/issues/useIssueReport.ts, importene i appenes frontend/src (2026-10-31)
+flowchart TB
+  apper["Konsumentapper<br/>biologportal, 6810, styreportal"]
+
+  subgraph lib["frontend-core"]
+    auth["createAuthProvider<br/>createAuthApi"]
+    iss["useIssueReport"]
+    api["createApiClient"]
+    lokal["Bare i nettleseren:<br/>ErrorBoundary, Modal, EmptyState, Skeleton<br/>Toast og Confirm (provider + hook)<br/>createQueryClient, formatters, saveBlob<br/>eslint-config, tsconfig"]
+    auth -- "/auth/*" --> api
+    iss -- "/issues" --> api
+  end
+
+  be[("Ktor-backend")]
+
+  apper -- "file:-avhengighet" --> lib
+  api <-- "/api + sti, cookies med<br/>X-CSRF-Token ved skriving<br/>401 gir onUnauthorized" --> be
+```
+
+Appene henter alt fra én pakke. `createApiClient` er det eneste stedet som snakker med
+backend: den legger `/api` foran stien, sender cookies med (`credentials: 'include'`) og
+legger CSRF-tokenet fra `csrf_token`-cookien (eller fra minnet) i `X-CSRF-Token` på alle
+kall som ikke er GET, HEAD eller OPTIONS. Ved 401 kalles `onUnauthorized` bare én gang til
+`resetUnauthorizedFlag()` er kjørt. Auth og issue-rapportering bygger på samme klient.
+
+Bruk i appene i dag (fra importene i `frontend/src`):
+
+| App | Henter |
+|-----|--------|
+| biologportal | `createApiClient`, `ApiError`, `createAuthProvider`, `createQueryClient`, `ErrorBoundary`, `ToastProvider`/`useToast`, `useIssueReport`, `saveBlob`, formatters |
+| 6810 | `createApiClient`, `createAuthProvider`, `createQueryClient`, `ErrorBoundary`, `ToastProvider`/`useToast`, `useIssueReport`, `saveBlob`, formatters |
+| styreportal | Som over, pluss `createAuthApi`, `ConfirmProvider`/`useConfirm`, `EmptyState`, `Skeleton` og `DownloadResult` |
+
 ## Installasjon
 
 Pakken publiseres **ikke** til GitHub Packages eller npm. Den konsumeres som et
