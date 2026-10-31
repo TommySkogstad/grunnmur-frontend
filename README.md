@@ -712,7 +712,27 @@ const { AuthProvider, useAuth, ProtectedRoute } = createAuthProvider<User>({
 })
 ```
 
-### 6810 (in-memory CSRF)
+### CSRF fra cookie (alle appene i dag)
+
+biologportal, 6810 og styreportal bruker alle `csrfSource: 'cookie'` (som også er
+standard). Klienten leser `csrf_token`-cookien på hvert kall og legger verdien i
+`X-CSRF-Token` på kall som ikke er GET, HEAD eller OPTIONS. Appen trenger ikke gjøre
+noe etter innlogging.
+
+```ts
+const api = createApiClient({
+  basePath: API_BASE,
+  csrfSource: 'cookie',
+  onUnauthorized: () => navigate('/logg-inn'),
+})
+```
+
+### CSRF i minnet (`csrfSource: 'memory'`)
+
+Ingen av appene bruker dette i dag. Med `csrfSource: 'memory'` leser klienten ikke
+cookien, og appen må selv sette tokenet, for eksempel fra `verifyCode`-svaret.
+`setCsrfToken()` virker bare i denne modusen. I cookie-modus gjør kallet ingenting
+og gir en advarsel i konsollen i dev.
 
 ```ts
 const api = createApiClient({
